@@ -34,6 +34,7 @@ type SettingsState = {
 	serverURL: string | undefined;
 	serverConfig: ServerConfig;
 	terminalTab: boolean;
+	ambientePos: boolean;
 	homeMenuItems: {
 		mesa: boolean;
 		comanda: boolean;
@@ -43,6 +44,7 @@ type SettingsState = {
 		setServerURL: (url: string) => void;
 		toggleHomeMenu: (key: keyof SettingsState['homeMenuItems']) => void;
 		toggleTerminalTab: () => void;
+		toggleAmbientePos: () => void;
 		updateServerConfig: (
 			config: { chave: ServerConfigKeys; valor: string | null }[],
 		) => void;
@@ -54,6 +56,7 @@ export const useSettingsStore = create<SettingsState>()(
 		immer((set) => ({
 			serverURL: undefined,
 			terminalTab: false,
+			ambientePos: false,
 			serverConfig: {},
 			homeMenuItems: {
 				mesa: true,
@@ -78,6 +81,12 @@ export const useSettingsStore = create<SettingsState>()(
 					});
 				},
 
+				toggleAmbientePos: () => {
+					set((state) => {
+						state.ambientePos = !state.ambientePos;
+					});
+				},
+
 				updateServerConfig: (config) =>
 					set((state) => {
 						config.forEach((item) => {
@@ -93,6 +102,7 @@ export const useSettingsStore = create<SettingsState>()(
 				serverURL: state.serverURL,
 				homeMenuItems: state.homeMenuItems,
 				terminalTab: state.terminalTab,
+				ambientePos: state.ambientePos,
 			}),
 		},
 	),

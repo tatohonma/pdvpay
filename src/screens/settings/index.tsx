@@ -12,13 +12,19 @@ import {
 	TouchableWithoutFeedback,
 	View,
 } from 'react-native';
-import { useSettingsStore } from '../../store/useSettingsStore';
 import DeviceInfo from 'react-native-device-info';
 import { useAppStore } from '../../store/useAppStore';
+import { useSettingsStore } from '../../store/useSettingsStore';
 
 export const SettingsScreen = () => {
-	const { serverURL, actions, homeMenuItems, serverConfig, terminalTab } =
-		useSettingsStore();
+	const {
+		serverURL,
+		actions,
+		homeMenuItems,
+		serverConfig,
+		terminalTab,
+		ambientePos,
+	} = useSettingsStore();
 	const navigation = useNavigation();
 	const [visible, setVisible] = useState<boolean>(false);
 	const { pdv } = useAppStore();
@@ -63,6 +69,14 @@ export const SettingsScreen = () => {
 						</View>
 
 						<View className="flex-row items-end justify-between border-b border-b-zinc-200 p-2.5">
+							<Text>Ambiente Pos</Text>
+							<Switch
+								value={ambientePos}
+								onValueChange={() => actions.toggleAmbientePos()}
+							/>
+						</View>
+
+						<View className="flex-row items-end justify-between border-b border-b-zinc-200 p-2.5">
 							<View>
 								<Text>Usar terminal tab</Text>
 								<Text className="text-xs text-zinc-600 font-extralight">
@@ -88,29 +102,29 @@ export const SettingsScreen = () => {
 					</View>
 
 					<View className="mt-4">
-					<Text className="mb-2 font-medium text-cyan-600">
-						Sobre o Aplicativo
-					</Text>
-					<Text>Identificação</Text>
-					<Text className="text-zinc-500">
-						Hardware: {DeviceInfo.getAndroidIdSync()}
-					</Text>
-					<Text className="text-zinc-500">
-						Comanda: {pdv.name} {pdv.idPDV}
-					</Text>
+						<Text className="mb-2 font-medium text-cyan-600">
+							Sobre o Aplicativo
+						</Text>
+						<Text>Identificação</Text>
+						<Text className="text-zinc-500">
+							Hardware: {DeviceInfo.getAndroidIdSync()}
+						</Text>
+						<Text className="text-zinc-500">
+							Comanda: {pdv.name} {pdv.idPDV}
+						</Text>
 
-					<Text className="mt-2">Sobre o programa</Text>
-					<Text className="text-zinc-500">
-						Versão do app: {DeviceInfo.getAndroidIdSync()}
-					</Text>
-				</View>
+						<Text className="mt-2">Sobre o programa</Text>
+						<Text className="text-zinc-500">
+							Versão do app: {DeviceInfo.getAndroidIdSync()}
+						</Text>
+					</View>
 
-				<TouchableOpacity
-					className="mt-8 bg-emerald-500 items-center py-2 rounded"
-					onPress={() => navigation.navigate('Auth')}
-				>
-					<Text className="font-semibold text-white">OK</Text>
-				</TouchableOpacity>
+					<TouchableOpacity
+						className="mt-8 bg-emerald-500 items-center py-2 rounded"
+						onPress={() => navigation.navigate('Auth')}
+					>
+						<Text className="font-semibold text-white">OK</Text>
+					</TouchableOpacity>
 				</View>
 			</ScrollView>
 
