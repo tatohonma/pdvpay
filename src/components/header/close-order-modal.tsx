@@ -100,36 +100,77 @@ export const CloseOrderModal = () => {
       >
         <Lucide name="dollar-sign" size={18} color="white" />
       </TouchableOpacity>
-      <Modal
-        transparent
-        visible={visible}
-        onRequestClose={() => setVisible(false)}
-      >
-        <View className="flex-1 justify-center items-center p-4">
-          <View className="p-4 bg-zinc-50 rounded shadow-lg w-[92%] max-w-md">
-            <Text className="text-sm text-zinc-600">Fechamento</Text>
-            <Text className="font-medium text-lg">
-              {params.type === "table" ? "Mesa" : "Comanda"}: {params.number}
-            </Text>
+      {visible && (
+        <Modal
+          transparent
+          visible={visible}
+          onRequestClose={() => setVisible(false)}
+        >
+          <View className="flex-1 justify-center items-center p-4">
+            <View className="p-4 bg-zinc-50 rounded shadow-lg w-[92%] max-w-md">
+              <Text className="text-sm text-zinc-600">Fechamento</Text>
+              <Text className="font-medium text-lg">
+                {params.type === "table" ? "Mesa" : "Comanda"}: {params.number}
+              </Text>
 
-            <TextInput
-              control={form.control}
-              label="Número de Pessoas"
-              name="people_number"
-              className="border-b border-b-zinc-600 text-zinc-500"
-            />
+              <Text className="text-zinc-400 text-xs font-medium">
+                Numero de pessoas
+              </Text>
 
-            <View className="flex-row mt-4 items-center justify-end gap-4">
-              <TouchableOpacity onPress={() => setVisible(false)}>
-                <Text>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={form.handleSubmit(onSubmit)}>
-                <Text>Fechar conta</Text>
-              </TouchableOpacity>
+              <View className="flex-row items-center justify-between mt-2">
+                <TouchableOpacity
+                  className="px-4 py-2 rounded bg-zinc-200"
+                  onPress={() =>
+                    form.setValue(
+                      "people_number",
+                      Number(form.getValues("people_number")) - 1 > 1
+                        ? Number(form.getValues("people_number")) - 1
+                        : 1,
+                    )
+                  }
+                >
+                  <Text>-</Text>
+                </TouchableOpacity>
+                <View className="flex-1">
+                  <TextInput
+                    control={form.control}
+                    name="people_number"
+                    className="border-none text-zinc-500 text-center align-middle justify-center items-center"
+                    autoFocus
+                    showSoftInputOnFocus={false}
+                  />
+                </View>
+                <TouchableOpacity
+                  className="px-4 py-2 rounded bg-zinc-200"
+                  onPress={() =>
+                    form.setValue(
+                      "people_number",
+                      Number(form.getValues("people_number")) + 1,
+                    )
+                  }
+                >
+                  <Text>+</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View className="flex-row mt-6 items-center justify-end gap-4">
+                <TouchableOpacity
+                  onPress={() => setVisible(false)}
+                  className="bg-zinc-100 px-4 py-2 rounded-lg"
+                >
+                  <Text>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={form.handleSubmit(onSubmit)}
+                  className="bg-zinc-100 px-4 py-2 rounded-lg"
+                >
+                  <Text>Fechar conta</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      )}
     </>
   );
 };
