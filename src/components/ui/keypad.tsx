@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { cn } from '../../utils/cn';
 
 interface KeypadButtonProps
@@ -17,6 +17,7 @@ interface KeypadProps {
 	label: string;
 	showBackspace?: boolean;
 	sensitive?: boolean;
+	autoFocus?: boolean;
 }
 
 const KeypadButton = ({
@@ -50,6 +51,7 @@ export const Keypad = ({
 	showBackspace = true,
 	value,
 	sensitive = false,
+	autoFocus = true,
 }: KeypadProps) => {
 	const navigation = useNavigation();
 
@@ -69,15 +71,20 @@ export const Keypad = ({
 						{label}
 					</Text>
 					<View className="pr-2">
-						<Text
+						<TextInput
 							style={{ textAlignVertical: 'center' }}
 							maxFontSizeMultiplier={1.3}
-							className="h-11 md:h-14 px-2 border border-zinc-400 text-zinc-900 rounded "
-						>
-							{sensitive
-								? Array.from({ length: value.length }).map((_) => '*')
-								: value}
-						</Text>
+							className="h-11 md:h-14 px-2 border border-zinc-400 text-zinc-900 rounded"
+							value={value}
+							onChangeText={onChange}
+							secureTextEntry={sensitive}
+							showSoftInputOnFocus={false}
+							caretHidden
+							autoFocus={autoFocus}
+							keyboardType="numeric"
+							returnKeyType="done"
+							onSubmitEditing={onNext}
+						/>
 					</View>
 				</View>
 
