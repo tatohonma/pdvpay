@@ -30,7 +30,7 @@ export const buildPreAccount = (order: Order) => {
 			content: `PEDIDO: ${order.IDPedido} - ${clientHeaderCommandOrTable}: ${order?.NumeroMesa ? order.NumeroMesa : order.NumeroComanda}`,
 		},
 		{
-			type: 'text', 
+			type: 'text',
 			content: ` Cliente: ${order.Cliente?.Nome || 'Não informado'}`,
 			size: 'medium',
 			align: 'start',

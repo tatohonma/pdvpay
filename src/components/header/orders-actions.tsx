@@ -5,6 +5,7 @@ import { queryClient } from '../../config/query';
 import { useServerConfig } from '../../store/useSettingsStore';
 import { CloseOrderModal } from './close-order-modal';
 import { AskRefModal } from './ref-modal';
+import { RequestPreAccountModal } from './request-pre-account';
 
 export const OrderActions = () => {
 	const navigation = useNavigation();
@@ -12,7 +13,7 @@ export const OrderActions = () => {
 
 	return (
 		<View className="flex-row gap-1">
-			<TouchableOpacity
+			{/* <TouchableOpacity
 				onPress={() =>
 					queryClient.invalidateQueries({
 						queryKey: ['order'],
@@ -21,7 +22,7 @@ export const OrderActions = () => {
 				className="p-1 rounded-full"
 			>
 				<Lucide name="rotate-cw" size={18} color="white" />
-			</TouchableOpacity>
+			</TouchableOpacity> */}
 			{serverConfig?.MostrarLista === '1' && (
 				<TouchableOpacity
 					onPress={() => navigation.navigate('OrderDetails')}
@@ -32,6 +33,7 @@ export const OrderActions = () => {
 			)}
 
 			{serverConfig.SolicitarRef === '1' && <AskRefModal />}
+			<RequestPreAccountModal />
 			<CloseOrderModal />
 			{/* {serverConfig.MostrarFecharConta === '1' && <CloseOrderModal />} */}
 		</View>

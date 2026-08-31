@@ -116,8 +116,9 @@ export const CloseOrderModal = () => {
 				return;
 			}
 
-			setWaitingPayment(false);
+			// await 
 
+			setWaitingPayment(false);
 			navigateRef.current();
 		},
 		[
