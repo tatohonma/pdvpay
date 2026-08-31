@@ -38,9 +38,10 @@ type Estabelecimento = {
 	Nome: string | null;
 };
 
-export const useGetOrder = ({ id }: { id: string }) => {
+export const useGetOrder = ({ id, enabled = true }: { id: string; enabled?: boolean }) => {
 	return useQuery<Order, AxiosError<{ Mensagem: string }>>({
 		retry: 0,
+		enabled,
 		queryKey: ['order', id],
 		queryFn: async () => {
 			const response = await api.get(`/api/Pedidos/${id}`);
