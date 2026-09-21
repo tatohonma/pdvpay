@@ -16,8 +16,11 @@ import {
 	View,
 } from 'react-native';
 import z from 'zod';
+import type { PaymentEntry } from '../../api/insert-payments';
 import { useAskCloseOrderMutation } from '../../hooks/useAskCloseAccountMutation';
+import { useCloseOrderMutation } from '../../hooks/useCloseOrderMutation';
 import { useGetOrder } from '../../hooks/useGetOrder';
+import { useInsertPaymentsMutation } from '../../hooks/useInsertPaymentsMutation';
 import {
 	type StonePaymentResponse,
 	usePaymentResponse,
@@ -42,6 +45,16 @@ const schema = z.object({
 	}),
 });
 
+const CARTAO_CREDITO_ID = 2;
+const CARTAO_DEBITO_ID = 3;
+
+const getTipoPagamentoId = (transactionType?: string) => {
+	if (transactionType?.toLowerCase().includes('debit')) {
+		return CARTAO_DEBITO_ID;
+	}
+	return CARTAO_CREDITO_ID;
+};
+
 export const CloseOrderModal = () => {
 	const { params } = useRoute<DetailsRouteProp>();
 	const [visible, setVisible] = useState<boolean>(false);
@@ -51,6 +64,7 @@ export const CloseOrderModal = () => {
 	const [totalPayments, setTotalPayments] = useState(1);
 
 	const paymentAmountRef = useRef(0);
+	const paymentsRef = useRef<PaymentEntry[]>([]);
 
 	const { currentOrderInfo } = useOrderStore();
 	const { pdv, user } = useAppStore();
@@ -58,6 +72,20 @@ export const CloseOrderModal = () => {
 	const serverConfig = useServerConfig();
 	const ambientePos = useSettingsStore((state) => state.ambientePos);
 	const stonePayment = useStonePayment();
+
+	const closeOrderRestMutation = useCloseOrderMutation({
+		onError: (err) => {
+			Alert.alert('Erro ao fechar pedido', JSON.stringify(err, null, 2));
+			console.log('Erro ao fechar pedido', JSON.stringify(err, null, 2));
+		},
+	});
+
+	const insertPaymentsMutation = useInsertPaymentsMutation({
+		onError: (err) => {
+			Alert.alert('Erro ao registrar pagamento', JSON.stringify(err, null, 2));
+			console.log('Erro ao registrar pagamento', JSON.stringify(err, null, 2));
+		},
+	});
 
 	const getPaymentAmount = useCallback(() => {
 		const total = paymentAmountRef.current;
@@ -102,7 +130,14 @@ export const CloseOrderModal = () => {
 	orderDataRef.current = order.data;
 
 	const onPaymentSuccess = useCallback(
-		(_data: StonePaymentResponse) => {
+		async (data: StonePaymentResponse) => {
+			paymentsRef.current.push({
+				Valor: getPaymentAmount(),
+				TipoPagamento: { IDTipoPagamento: getTipoPagamentoId(data.type) },
+				Autorizacao: data.authorization_code,
+				Bandeira: data.brand,
+			});
+
 			const nextPaymentIndex = paymentIndex + 1;
 
 			if (nextPaymentIndex < totalPayments) {
@@ -116,7 +151,20 @@ export const CloseOrderModal = () => {
 				return;
 			}
 
-			// await 
+			await insertPaymentsMutation.mutateAsync({
+				GUIDSolicitacao: String(currentOrderInfo?.guidIdentificacao),
+				IDTipoPedido: Number(currentOrderInfo?.idTipoPedido),
+				Numero: Number(params.number),
+				IDUsuario: Number(user.id),
+				IDPDV: Number(pdv.idPDV),
+				Pagamentos: paymentsRef.current,
+			});
+
+			await closeOrderRestMutation.mutateAsync({
+				IDPedido: Number(currentOrderInfo?.idPedido),
+				IDPdv: Number(pdv.idPDV),
+				ChaveAcesso: String(user.chaveAcesso ?? ''),
+			});
 
 			setWaitingPayment(false);
 			navigateRef.current();
@@ -127,6 +175,14 @@ export const CloseOrderModal = () => {
 			getPaymentAmount,
 			stonePayment,
 			currentOrderInfo?.idPedido,
+			currentOrderInfo?.guidIdentificacao,
+			currentOrderInfo?.idTipoPedido,
+			closeOrderRestMutation,
+			insertPaymentsMutation,
+			pdv.idPDV,
+			user.id,
+			user.chaveAcesso,
+			params.number,
 		],
 	);
 
@@ -156,6 +212,7 @@ export const CloseOrderModal = () => {
 			const peopleNumber = Math.max(1, data.people_number);
 
 			paymentAmountRef.current = total;
+			paymentsRef.current = [];
 
 			setTotalPayments(peopleNumber);
 			setPaymentIndex(0);

@@ -1,25 +1,35 @@
 import { api } from '../config/axios';
 
-type CloseOrderRequest = {
+export type CloseOrderRequest = {
 	IDPedido: number;
 	IDPdv: number;
 	ChaveAcesso: string;
-	DocNfe: string;
-	DocFidelidade: string;
-	GerarOrdemProducao: boolean;
-	Cancelar: boolean;
-	ImagemComprovante: 0;
+	DocNfe?: string;
+	DocFidelidade?: string;
+	GerarOrdemProducao?: boolean;
+	Cancelar?: boolean;
+	ImagemComprovante?: number;
 };
 
 export const closeOrder = async ({
-	Cancelar = false,
-	IDPdv,
 	IDPedido,
+	IDPdv,
+	ChaveAcesso,
+	DocNfe = '',
+	DocFidelidade = '',
+	GerarOrdemProducao = false,
+	Cancelar = false,
+	ImagemComprovante = 0,
 }: CloseOrderRequest) => {
 	const response = await api.post('/api/pedidos/fechar', {
-		Cancelar,
-		IDPdv,
 		IDPedido,
+		IDPdv,
+		ChaveAcesso,
+		DocNfe,
+		DocFidelidade,
+		GerarOrdemProducao,
+		Cancelar,
+		ImagemComprovante,
 	});
 	return response.data;
 };

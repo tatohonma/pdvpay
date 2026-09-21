@@ -9,8 +9,8 @@ export const useAuthMutation = () => {
 
 	return useMutation({
 		mutationFn: auth,
-		onSuccess: (data) => {
-			actions.setUser(data.idUsuario, data.nome);
+		onSuccess: (data, variables) => {
+			actions.setUser(data.idUsuario, data.nome, variables.password);
 			navigation.navigate('Home');
 		},
 	});

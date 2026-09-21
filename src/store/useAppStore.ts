@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 interface AppStoreActions {
-	setUser: (id: number, name: string) => void;
+	setUser: (id: number, name: string, chaveAcesso: string) => void;
 	setPdv: ({
 		idPDV,
 		name,
@@ -17,6 +17,7 @@ interface AppState {
 	user: {
 		id?: number;
 		name?: string;
+		chaveAcesso?: string;
 	};
 	pdv: {
 		idPDV?: number;
@@ -30,6 +31,7 @@ export const useAppStore = create<AppState>((set) => ({
 	user: {
 		id: undefined,
 		name: undefined,
+		chaveAcesso: undefined,
 	},
 	pdv: {
 		idPDV: undefined,
@@ -37,8 +39,8 @@ export const useAppStore = create<AppState>((set) => ({
 		versaoWS: undefined,
 	},
 	actions: {
-		setUser: (id: number, name: string) => {
-			set({ user: { id, name } });
+		setUser: (id: number, name: string, chaveAcesso: string) => {
+			set({ user: { id, name, chaveAcesso } });
 		},
 		setPdv: (data) => {
 			set({ pdv: data });
