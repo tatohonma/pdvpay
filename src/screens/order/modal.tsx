@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { OptionButton } from '../../components/ui/option-button';
-import { useOrderStore } from '../../store/useOrderStore';
+import { useOrderStore, useOrderStoreActions } from '../../store/useOrderStore';
 
 interface extraInfoModalProps {
 	product: {
@@ -13,7 +13,12 @@ interface extraInfoModalProps {
 
 export const ExtraInfoModal = ({ product }: extraInfoModalProps) => {
 	const [visible, setVisible] = useState<boolean>(false);
-	const { actions, selectedProducts } = useOrderStore();
+	const actions = useOrderStoreActions();
+	const selectedQtd = useOrderStore(
+		(state) =>
+			state.selectedProducts.find((e) => e.idProduto === product.IDProduto)
+				?.qtd,
+	);
 
 	const [values, setValues] = useState({
 		amount: 1,
@@ -38,8 +43,7 @@ export const ExtraInfoModal = ({ product }: extraInfoModalProps) => {
 				textStyles="h-16"
 			>
 				<Text className="absolute left-4 bottom-2.5 text-xs p-0.5">
-					{selectedProducts.find((e) => e.idProduto === product.IDProduto)
-						?.qtd ?? ''}
+					{selectedQtd ?? ''}
 				</Text>
 			</OptionButton>
 			<Modal

@@ -13,16 +13,15 @@ export const OrderActions = () => {
 
 	return (
 		<View className="flex-row gap-1">
-			{/* <TouchableOpacity
-				onPress={() =>
-					queryClient.invalidateQueries({
-						queryKey: ['order'],
-					})
-				}
+			<TouchableOpacity
+				onPress={() => {
+					queryClient.invalidateQueries({ queryKey: ['categories'] });
+					queryClient.invalidateQueries({ queryKey: ['products'] });
+				}}
 				className="p-1 rounded-full"
 			>
 				<Lucide name="rotate-cw" size={18} color="white" />
-			</TouchableOpacity> */}
+			</TouchableOpacity>
 			{serverConfig?.MostrarLista === '1' && (
 				<TouchableOpacity
 					onPress={() => navigation.navigate('OrderDetails')}

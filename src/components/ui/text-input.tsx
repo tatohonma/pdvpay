@@ -29,7 +29,7 @@ export function TextInput({
               <RNTextInput
                 className={cn("rounded text-zinc-700", className)}
                 onChangeText={field.onChange}
-                value={String(field.value)}
+                value={field.value != null ? String(field.value) : ""}
                 {...rest}
               />
               {error && (

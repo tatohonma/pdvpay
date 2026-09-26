@@ -8,7 +8,7 @@ type categoriesType = {
 	Disponibilidade: boolean;
 };
 
-interface useGetProductsByCategoriesResponse {
+export interface Product {
 	IDProduto: number;
 	IDTipoProduto: number;
 	Nome: string;
@@ -20,21 +20,12 @@ interface useGetProductsByCategoriesResponse {
 	Disponibilidade: boolean;
 	DtAlteracaoDisponibilidade: Date;
 	Categorias: categoriesType[];
-	// PaineisDeModificacao: [];
-	// AreasDeImpressao: [];
 }
 
-export const useGetProductsByCategories = ({
-	categoryId,
-}: {
-	categoryId?: number;
-}) => {
-	return useQuery<
-		useGetProductsByCategoriesResponse[],
-		AxiosError<{ Mensagem: string }>
-	>({
+export const useGetProducts = () => {
+	return useQuery<Product[], AxiosError<{ Mensagem: string }>>({
 		retry: 0,
-		queryKey: ['products', categoryId],
+		queryKey: ['products'],
 		queryFn: async () => {
 			const response = await api.get(`/api/produtos`, {
 				params: {
@@ -42,7 +33,7 @@ export const useGetProductsByCategories = ({
 					tipo: 0,
 					ativo: 'all',
 					disponivel: 'all',
-					categoria: categoryId,
+					categoria: 0,
 				},
 			});
 
