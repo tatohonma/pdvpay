@@ -14,7 +14,6 @@ import z from 'zod';
 import { type Order, useGetOrder } from '../../hooks/useGetOrder';
 import { useOrderStore } from '../../store/useOrderStore';
 import { buildPreAccount } from '../../utils/pre-account';
-import { TextInput } from '../ui/text-input';
 
 type DetailsRouteProp = RouteProp<
 	{ Order: { number: string; type: 'command' | 'table' } },
@@ -178,67 +177,30 @@ export const RequestPreAccountModal = () => {
 				<Modal
 					transparent
 					visible={visible}
+					animationType="fade"
 					onRequestClose={() => setVisible(false)}
 				>
-					<View className="flex-1 justify-center items-center p-4">
-						<View className="p-4 bg-zinc-50 rounded shadow-lg w-[92%] max-w-md">
-							<Text className="text-sm text-zinc-600">Imprimir conta</Text>
-							<Text className="font-medium text-lg">
+					<View className="flex-1 justify-center items-center p-4 bg-black/40">
+						<View className="p-5 bg-white rounded-2xl shadow-lg w-[92%] max-w-md">
+							<Text className="text-xs font-medium text-zinc-500">
+								Imprimir conta
+							</Text>
+							<Text className="font-semibold text-lg text-zinc-800">
 								{params.type === 'table' ? 'Mesa' : 'Comanda'}: {params.number}
 							</Text>
 
-							{/* <Text className="text-zinc-400 text-xs font-medium">
-								Numero de pessoas
-							</Text> */}
-
-							<View className="flex-row items-center justify-between mt-2">
-								{/* <TouchableOpacity
-									className="px-4 py-2 rounded bg-zinc-200"
-									onPress={() =>
-										form.setValue(
-											'people_number',
-											Number(form.getValues('people_number')) - 1 > 1
-												? Number(form.getValues('people_number')) - 1
-												: 1,
-										)
-									}
-								>
-									<Text>-</Text>
-								</TouchableOpacity> */}
-								{/* <View className="flex-1">
-									<TextInput
-										control={form.control}
-										name="people_number"
-										className="border-none text-zinc-500 text-center align-middle justify-center items-center"
-										autoFocus
-										showSoftInputOnFocus={false}
-									/>
-								</View> */}
-								{/* <TouchableOpacity
-									className="px-4 py-2 rounded bg-zinc-200"
-									onPress={() =>
-										form.setValue(
-											'people_number',
-											Number(form.getValues('people_number')) + 1,
-										)
-									}
-								>
-									<Text>+</Text>
-								</TouchableOpacity> */}
-							</View>
-
-							<View className="flex-row mt-6 items-center justify-end gap-4">
+							<View className="flex-row mt-5 items-center justify-end gap-3">
 								<TouchableOpacity
 									onPress={() => setVisible(false)}
-									className="bg-zinc-100 px-4 py-2 rounded-lg"
+									className="px-4 py-2.5 rounded-lg bg-zinc-100"
 								>
-									<Text>Cancelar</Text>
+									<Text className="text-zinc-600 font-medium">Cancelar</Text>
 								</TouchableOpacity>
 								<TouchableOpacity
 									onPress={form.handleSubmit(onSubmit)}
-									className="bg-zinc-100 px-4 py-2 rounded-lg"
+									className="px-5 py-2.5 rounded-lg bg-emerald-500"
 								>
-									<Text>Confirmar</Text>
+									<Text className="text-white font-semibold">Confirmar</Text>
 								</TouchableOpacity>
 							</View>
 						</View>

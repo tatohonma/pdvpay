@@ -253,22 +253,25 @@ export const CloseOrderModal = () => {
 				<Modal
 					transparent
 					visible={visible}
+					animationType="fade"
 					onRequestClose={() => setVisible(false)}
 				>
-					<View className="flex-1 justify-center items-center p-4">
-						<View className="p-4 bg-zinc-50 rounded shadow-lg w-[92%] max-w-md">
-							<Text className="text-sm text-zinc-600">Fechamento</Text>
-							<Text className="font-medium text-lg">
+					<View className="flex-1 justify-center items-center p-4 bg-black/40">
+						<View className="p-5 bg-white rounded-2xl shadow-lg w-[92%] max-w-md">
+							<Text className="text-xs font-medium text-zinc-500">
+								Fechamento
+							</Text>
+							<Text className="font-semibold text-lg text-zinc-800 mb-4">
 								{params.type === 'table' ? 'Mesa' : 'Comanda'}: {params.number}
 							</Text>
 
-							<Text className="text-zinc-400 text-xs font-medium">
+							<Text className="text-xs font-medium text-zinc-500 mb-1.5">
 								Numero de pessoas
 							</Text>
 
-							<View className="flex-row items-center justify-between mt-2">
+							<View className="flex-row items-center gap-3">
 								<TouchableOpacity
-									className="px-4 py-2 rounded bg-zinc-200"
+									className="w-10 h-10 rounded-lg bg-zinc-100 items-center justify-center"
 									onPress={() =>
 										form.setValue(
 											'people_number',
@@ -278,19 +281,19 @@ export const CloseOrderModal = () => {
 										)
 									}
 								>
-									<Text>-</Text>
+									<Lucide name="minus" size={18} color="#3f3f46" />
 								</TouchableOpacity>
 								<View className="flex-1">
 									<TextInput
 										control={form.control}
 										name="people_number"
-										className="border-none text-zinc-500 text-center align-middle justify-center items-center"
+										className="h-10 rounded-lg bg-zinc-100 text-zinc-800 font-medium text-center"
 										autoFocus
 										showSoftInputOnFocus={false}
 									/>
 								</View>
 								<TouchableOpacity
-									className="px-4 py-2 rounded bg-zinc-200"
+									className="w-10 h-10 rounded-lg bg-zinc-100 items-center justify-center"
 									onPress={() =>
 										form.setValue(
 											'people_number',
@@ -298,22 +301,24 @@ export const CloseOrderModal = () => {
 										)
 									}
 								>
-									<Text>+</Text>
+									<Lucide name="plus" size={18} color="#3f3f46" />
 								</TouchableOpacity>
 							</View>
 
-							<View className="flex-row mt-6 items-center justify-end gap-4">
+							<View className="flex-row mt-5 items-center justify-end gap-3">
 								<TouchableOpacity
 									onPress={() => setVisible(false)}
-									className="bg-zinc-100 px-4 py-2 rounded-lg"
+									className="px-4 py-2.5 rounded-lg bg-zinc-100"
 								>
-									<Text>Cancelar</Text>
+									<Text className="text-zinc-600 font-medium">Cancelar</Text>
 								</TouchableOpacity>
 								<TouchableOpacity
 									onPress={form.handleSubmit(onSubmit)}
-									className="bg-zinc-100 px-4 py-2 rounded-lg"
+									className="px-5 py-2.5 rounded-lg bg-emerald-500"
 								>
-									<Text>Fechar conta</Text>
+									<Text className="text-white font-semibold">
+										Fechar conta
+									</Text>
 								</TouchableOpacity>
 							</View>
 						</View>

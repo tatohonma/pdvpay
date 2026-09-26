@@ -31,7 +31,7 @@ const KeypadButton = ({
 		<View className={cn('p-1 w-1/3', containerStyle)}>
 			<TouchableOpacity
 				className={cn(
-					'bg-zinc-200 items-center justify-center py-4 md:py-5 rounded-xs',
+					'bg-zinc-200 items-center justify-center py-4 md:py-5 rounded-lg',
 					className,
 				)}
 				{...rest}
@@ -74,7 +74,7 @@ export const Keypad = ({
 						<TextInput
 							style={{ textAlignVertical: 'center' }}
 							maxFontSizeMultiplier={1.3}
-							className="h-11 md:h-14 px-2 border border-zinc-400 text-zinc-900 rounded"
+							className="h-11 md:h-14 px-2 border border-zinc-300 text-zinc-900 rounded-lg"
 							value={value}
 							onChangeText={onChange}
 							secureTextEntry={sensitive}
@@ -90,7 +90,7 @@ export const Keypad = ({
 
 				<TouchableOpacity
 					onPress={handleErase}
-					className="bg-red-500 w-1/6 rounded items-center justify-center h-11 md:h-14"
+					className="bg-red-500 w-1/6 rounded-lg items-center justify-center h-11 md:h-14"
 				>
 					<Text maxFontSizeMultiplier={1.3} className="text-white font-bold">
 						{'<'}

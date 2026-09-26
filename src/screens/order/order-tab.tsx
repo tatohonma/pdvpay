@@ -59,7 +59,7 @@ export const OrderTab = () => {
 
 	return (
 		<View className="flex-1 p-2">
-			<View className="bg-blue-100 rounded-md px-2.5 py-1.5">
+			<View className="bg-blue-100 rounded-lg px-2.5 py-1.5">
 				<View className="flex-row flex-wrap justify-between gap-2">
 					<Text className="font-medium text-base md:text-lg">
 						{params.type === 'table' ? 'Mesa' : 'Comanda'}: {params.number}
@@ -166,7 +166,7 @@ export const OrderTab = () => {
 							referenciaLocalizacao: currentOrderInfo?.referenciaLocalizacao,
 						});
 					}}
-					className="w-full p-2.5 items-center justify-center bg-emerald-500 rounded"
+					className="w-full p-2.5 items-center justify-center bg-emerald-500 rounded-lg"
 				>
 					<Text className="text-white font-semibold">Confirmar</Text>
 				</TouchableOpacity>

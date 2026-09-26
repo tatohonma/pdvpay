@@ -1,21 +1,17 @@
 import { Lucide } from '@react-native-vector-icons/lucide';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
 	ActivityIndicator,
 	FlatList,
+	type ListRenderItemInfo,
 	Text,
 	useWindowDimensions,
 	View,
 } from 'react-native';
-import { useGetProducts } from '../../hooks/useGetProducts';
+import { useGetProducts, type Product } from '../../hooks/useGetProducts';
+import { getNumColumns } from '../../utils/columns';
 import { ExtraInfoModal } from './modal';
 import { useOrderStore } from '../../store/useOrderStore';
-
-const getNumColumns = (width: number) => {
-	if (width >= 1024) return 4;
-	if (width >= 768) return 3;
-	return 2;
-};
 
 const StateMessage = ({
 	icon,
@@ -57,6 +53,11 @@ export const ProductsTab = () => {
 		[products.data, categoryId],
 	);
 
+	const renderItem = useCallback(
+		({ item }: ListRenderItemInfo<Product>) => <ExtraInfoModal product={item} />,
+		[],
+	);
+
 	const renderEmptyState = () => {
 		if (products.isLoading) {
 			return (
@@ -95,8 +96,12 @@ export const ProductsTab = () => {
 			data={filteredProducts}
 			keyExtractor={(p) => String(p.IDProduto)}
 			numColumns={numColumns}
-			renderItem={({ item }) => <ExtraInfoModal product={item} />}
+			renderItem={renderItem}
 			ListEmptyComponent={renderEmptyState}
+			initialNumToRender={20}
+			maxToRenderPerBatch={20}
+			windowSize={9}
+			removeClippedSubviews
 		/>
 	);
 };

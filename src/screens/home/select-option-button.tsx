@@ -18,7 +18,7 @@ export const SelectOptionButton = ({
 	return (
 		<TouchableOpacity
 			className={cn(
-				'py-2 bg-zinc-200 items-center rounded',
+				'py-2.5 bg-zinc-200 items-center rounded-lg',
 				active === name && 'bg-cyan-600',
 			)}
 			onPress={() => handleSelect?.(name)}

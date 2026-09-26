@@ -1,38 +1,64 @@
-import { ScrollView, View } from 'react-native';
-
+import { useCallback, useMemo } from 'react';
+import {
+	FlatList,
+	type ListRenderItemInfo,
+	useWindowDimensions,
+} from 'react-native';
 import { OptionButton } from '../../components/ui/option-button';
 import { useGetCategories } from '../../hooks/useGetCategories';
-import { useTabStore } from './useTabStore';
 import { useOrderStoreActions } from '../../store/useOrderStore';
+import { getNumColumns } from '../../utils/columns';
+import { useTabStore } from './useTabStore';
+
+type CategoryItem = {
+	IDCategoria: number;
+	Nome: string;
+};
+
+const ALL_CATEGORY: CategoryItem = { IDCategoria: 0, Nome: 'Todos' };
 
 export const CategoryTab = () => {
 	const { setIndex } = useTabStore();
 	const categories = useGetCategories();
 	const actions = useOrderStoreActions();
+	const { width } = useWindowDimensions();
+	const numColumns = getNumColumns(width);
+
+	const data = useMemo(
+		() => [ALL_CATEGORY, ...(categories.data ?? [])],
+		[categories.data],
+	);
+
+	const handleSelect = useCallback(
+		(id: number) => {
+			actions.setCategoryId(id);
+			setIndex(1);
+		},
+		[actions, setIndex],
+	);
+
+	const renderItem = useCallback(
+		({ item }: ListRenderItemInfo<CategoryItem>) => (
+			<OptionButton
+				title={item.Nome}
+				onPress={() => handleSelect(item.IDCategoria)}
+			/>
+		),
+		[handleSelect],
+	);
 
 	return (
-		<ScrollView className="p-1">
-			<View className="flex-row flex-wrap">
-				<OptionButton
-					title="Todos"
-					onPress={() => {
-						actions.setCategoryId(0);
-						setIndex(1);
-					}}
-				/>
-				{categories.data?.map((c, _i) => {
-					return (
-						<OptionButton
-							onPress={() => {
-								actions.setCategoryId(c.IDCategoria);
-								setIndex(1);
-							}}
-							title={c.Nome}
-							key={c.IDCategoria}
-						/>
-					);
-				})}
-			</View>
-		</ScrollView>
+		<FlatList
+			key={numColumns}
+			className="p-1"
+			data={data}
+			keyExtractor={(c) => String(c.IDCategoria)}
+			numColumns={numColumns}
+			renderItem={renderItem}
+			initialNumToRender={20}
+			maxToRenderPerBatch={20}
+			windowSize={9}
+			removeClippedSubviews
+		/>
 	);
 };

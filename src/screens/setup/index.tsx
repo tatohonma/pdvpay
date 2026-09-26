@@ -26,7 +26,7 @@ export const SetupScreen = () => {
 			<TextInput control={control} name="serverURL" label="URL do Servidor" />
 
 			<TouchableOpacity
-				className="mt-2 p-2 rounded bg-emerald-500"
+				className="mt-2 p-2.5 rounded-lg bg-emerald-500"
 				onPress={handleSubmit(({ serverURL }) => {
 					setServerURL(serverURL);
 					navigation.navigate('Auth');

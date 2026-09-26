@@ -149,43 +149,53 @@ export const CheckIn = (props: Props) => {
         {mutation.isPending || (mutation.isPending && <ActivityIndicator />)}
       </View>
 
-      <Modal transparent visible={open} onRequestClose={() => setOpen(false)}>
-        <View className="flex-1 justify-center items-center p-4">
-          <View className="p-4 bg-zinc-50 rounded shadow-lg w-[92%] max-w-md">
-            <Text className="text-zinc-600 font-medium">Tipo de entrada</Text>
-
-            <View className="mt-2" />
+      <Modal
+        transparent
+        visible={open}
+        animationType="fade"
+        onRequestClose={() => setOpen(false)}
+      >
+        <View className="flex-1 justify-center items-center p-4 bg-black/40">
+          <View className="p-5 bg-white rounded-2xl shadow-lg w-[92%] max-w-md">
+            <Text className="text-xs font-medium text-zinc-500 mb-2">
+              Tipo de entrada
+            </Text>
 
             {commandEntries.map((entry: any) => {
               return (
-                <View key={entry.IDTipoEntrada}>
-                  <Pressable
-                    className="flex-row items-center gap-2"
-                    onPress={() =>
-                      form.setValue(
-                        "IDTipoEntrada",
-                        String(entry.IDTipoEntrada),
-                      )
-                    }
-                  >
-                    <View className="h-4 w-4 rounded-full border border-zinc-400 flex justify-center items-center">
-                      {form.watch("IDTipoEntrada") ===
-                        String(entry.IDTipoEntrada) && (
-                        <View className="h-2.5 w-2.5 rounded-full bg-zinc-200" />
-                      )}
-                    </View>
-                    <Text className="text-zinc-600">{entry.Nome}</Text>
-                  </Pressable>
-                </View>
+                <Pressable
+                  key={entry.IDTipoEntrada}
+                  className="flex-row items-center gap-3 py-2"
+                  onPress={() =>
+                    form.setValue(
+                      "IDTipoEntrada",
+                      String(entry.IDTipoEntrada),
+                    )
+                  }
+                >
+                  <View className="h-5 w-5 rounded-full border-2 border-zinc-300 items-center justify-center">
+                    {form.watch("IDTipoEntrada") ===
+                      String(entry.IDTipoEntrada) && (
+                      <View className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                    )}
+                  </View>
+                  <Text className="text-zinc-700">{entry.Nome}</Text>
+                </Pressable>
               );
             })}
 
-            <View className="flex-row mt-4 items-center justify-end gap-4">
-              <TouchableOpacity onPress={() => setOpen(false)}>
-                <Text>Cancelar</Text>
+            <View className="flex-row mt-5 items-center justify-end gap-3">
+              <TouchableOpacity
+                onPress={() => setOpen(false)}
+                className="px-4 py-2.5 rounded-lg bg-zinc-100"
+              >
+                <Text className="text-zinc-600 font-medium">Cancelar</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={form.handleSubmit(handleOpenCommand)}>
-                <Text>Confirmar</Text>
+              <TouchableOpacity
+                onPress={form.handleSubmit(handleOpenCommand)}
+                className="px-5 py-2.5 rounded-lg bg-emerald-500"
+              >
+                <Text className="text-white font-semibold">Confirmar</Text>
               </TouchableOpacity>
             </View>
           </View>

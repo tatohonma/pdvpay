@@ -17,7 +17,9 @@ export function TextInput({
 }: TextInputProps) {
   return (
     <View>
-      {label && <Text className="mb-1">{label}</Text>}
+      {label && (
+        <Text className="mb-1 text-xs font-medium text-zinc-500">{label}</Text>
+      )}
       <Controller
         control={control}
         name={name}
@@ -27,7 +29,11 @@ export function TextInput({
           return (
             <>
               <RNTextInput
-                className={cn("rounded text-zinc-700", className)}
+                placeholderTextColor="#a1a1aa"
+                className={cn(
+                  "rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-800",
+                  className,
+                )}
                 onChangeText={field.onChange}
                 value={field.value != null ? String(field.value) : ""}
                 {...rest}

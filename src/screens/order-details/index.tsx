@@ -10,7 +10,7 @@ export const OrderDetailsScreen = () => {
 	return (
 		<View className="flex-1 p-2">
 			<ScrollView>
-				<View className="bg-amber-100 shadow rounded-md px-2.5 py-1.5">
+				<View className="bg-amber-100 shadow rounded-lg px-2.5 py-1.5">
 					<View className="flex-row flex-wrap justify-between gap-2">
 						{order.data?.NumeroMesa && (
 							<Text className="font-medium text-base md:text-lg">
