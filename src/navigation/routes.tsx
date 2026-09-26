@@ -28,7 +28,7 @@ export const RootStack = createNativeStackNavigator({
     },
     headerTintColor: "#fff",
     headerShadowVisible: false,
-    title: "PDVSEVEN",
+    title: "ZOLV",
   },
   screens: {
     Home: HomeScreen,

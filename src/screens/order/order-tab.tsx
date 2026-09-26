@@ -6,6 +6,7 @@ import {
 } from '@react-navigation/native';
 import { useMutation } from '@tanstack/react-query';
 import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { v4 as uuidv4 } from 'uuid';
 import { type AddProductsParams, addProducts } from '../../soap/add-products';
 import { useOrderStore } from '../../store/useOrderStore';
@@ -26,6 +27,7 @@ export const OrderTab = () => {
 	const serverConfig = useServerConfig();
 	const pdv = usePDV();
 	const user = useUser();
+	const insets = useSafeAreaInsets();
 
 	const mutation = useMutation({
 		mutationFn: (newProducts: AddProductsParams) => addProducts(newProducts),
@@ -146,7 +148,10 @@ export const OrderTab = () => {
 					})}
 				</View>
 			</ScrollView>
-			<View className="items-center">
+			<View
+				className="items-center"
+				style={{ paddingBottom: insets.bottom }}
+			>
 				<TouchableOpacity
 					onPress={async () => {
 						await mutation.mutateAsync({

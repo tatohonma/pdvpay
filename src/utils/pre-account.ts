@@ -6,7 +6,7 @@ export const buildPreAccount = (order: Order) => {
 	const header = [
 		{
 			type: 'text',
-			content: 'PDVSEVEN',
+			content: 'ZOLV',
 			align: 'center',
 			size: 'big',
 		},
@@ -91,7 +91,7 @@ export const buildPreAccount = (order: Order) => {
 		},
 		{
 			type: 'text',
-			content: 'PDV seven - www.pdvseven.com.br',
+			content: 'ZOLV',
 			align: 'center',
 			size: 'medium',
 		},
