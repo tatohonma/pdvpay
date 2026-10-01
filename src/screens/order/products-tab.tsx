@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGetProducts, type Product } from '../../hooks/useGetProducts';
 import { getNumColumns } from '../../utils/columns';
+import { compareByName } from '../../utils/sort';
 import { ExtraInfoModal } from './modal';
 import { useOrderStore } from '../../store/useOrderStore';
 
@@ -43,19 +44,25 @@ export const ProductsTab = () => {
 	const insets = useSafeAreaInsets();
 	const numColumns = getNumColumns(width);
 
+	// Filtra e ordena uma única vez por carga; trocar de categoria só refiltra
+	const sellableProducts = useMemo(
+		() =>
+			(products.data ?? [])
+				.filter(
+					(p) => p.IDProduto > 4 && p.Disponibilidade && p.IDTipoProduto === 10,
+				)
+				.sort(compareByName),
+		[products.data],
+	);
+
 	const filteredProducts = useMemo(
 		() =>
-			products.data
-				?.filter(
-					(p) =>
-						p.IDProduto > 4 &&
-						p.Disponibilidade &&
-						p.IDTipoProduto === 10 &&
-						(categoryId === 0 ||
-							p.Categorias.some((c) => c.IDCategoria === categoryId)),
-				)
-				.sort((a, b) => a.Nome.localeCompare(b.Nome, 'pt-BR')) ?? [],
-		[products.data, categoryId],
+			categoryId === 0
+				? sellableProducts
+				: sellableProducts.filter((p) =>
+						p.Categorias.some((c) => c.IDCategoria === categoryId),
+					),
+		[sellableProducts, categoryId],
 	);
 
 	const renderItem = useCallback(

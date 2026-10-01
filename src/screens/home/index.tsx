@@ -1,11 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { ActivityIndicator, Text, View } from "react-native";
 import z from "zod";
 import { Keypad } from "../../components/ui/keypad";
 import { ResponsiveScreen } from "../../components/ui/layout";
+import { queryClient } from "../../config/query";
+import { categoriesQueryOptions } from "../../hooks/useGetCategories";
+import { productsQueryOptions } from "../../hooks/useGetProducts";
 import { useValidateCommand } from "../../hooks/useValidateCommand";
 import { useValidateTable } from "../../hooks/useValidateTable";
 import { useOrderStoreActions } from "../../store/useOrderStore";
@@ -29,6 +32,12 @@ export const HomeScreen = () => {
   const [error, setError] = useState<null | undefined | string>(null);
 
   const { setCurrentOrderInfo } = useOrderStoreActions();
+
+  // Aquece o cache enquanto o usuário digita o número, para a tela de pedido abrir já com os dados
+  useEffect(() => {
+    queryClient.prefetchQuery({ ...categoriesQueryOptions, retry: 0 });
+    queryClient.prefetchQuery({ ...productsQueryOptions, retry: 0 });
+  }, []);
 
   const form = useForm({
     resolver: zodResolver(schema),

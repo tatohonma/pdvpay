@@ -9,6 +9,7 @@ import { OptionButton } from '../../components/ui/option-button';
 import { useGetCategories } from '../../hooks/useGetCategories';
 import { useOrderStoreActions } from '../../store/useOrderStore';
 import { getNumColumns } from '../../utils/columns';
+import { compareByName } from '../../utils/sort';
 import { useTabStore } from './useTabStore';
 
 type CategoryItem = {
@@ -29,9 +30,7 @@ export const CategoryTab = () => {
 	const data = useMemo(
 		() => [
 			ALL_CATEGORY,
-			...[...(categories.data ?? [])].sort((a, b) =>
-				a.Nome.localeCompare(b.Nome, 'pt-BR'),
-			),
+			...[...(categories.data ?? [])].sort(compareByName),
 		],
 		[categories.data],
 	);

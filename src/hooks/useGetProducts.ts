@@ -22,22 +22,26 @@ export interface Product {
 	Categorias: categoriesType[];
 }
 
+export const productsQueryOptions = {
+	queryKey: ['products'],
+	queryFn: async (): Promise<Product[]> => {
+		const response = await api.get(`/api/produtos`, {
+			params: {
+				id: 0,
+				tipo: 0,
+				ativo: 'all',
+				disponivel: 'all',
+				categoria: 0,
+			},
+		});
+
+		return response.data;
+	},
+};
+
 export const useGetProducts = () => {
 	return useQuery<Product[], AxiosError<{ Mensagem: string }>>({
 		retry: 0,
-		queryKey: ['products'],
-		queryFn: async () => {
-			const response = await api.get(`/api/produtos`, {
-				params: {
-					id: 0,
-					tipo: 0,
-					ativo: 'all',
-					disponivel: 'all',
-					categoria: 0,
-				},
-			});
-
-			return response.data;
-		},
+		...productsQueryOptions,
 	});
 };
