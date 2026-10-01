@@ -3,6 +3,8 @@ import { memo, useCallback, useState } from 'react';
 import { Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { OptionButton } from '../../components/ui/option-button';
 import { useOrderStore, useOrderStoreActions } from '../../store/useOrderStore';
+import { useServerConfig } from '../../store/useSettingsStore';
+import { PriceModal } from './price-modal';
 
 interface extraInfoModalProps {
 	product: {
@@ -17,11 +19,22 @@ export const ExtraInfoModal = memo(function ExtraInfoModal({
 }: extraInfoModalProps) {
 	const [visible, setVisible] = useState<boolean>(false);
 	const actions = useOrderStoreActions();
-	const selectedQtd = useOrderStore(
-		(state) =>
-			state.selectedProducts.find((e) => e.idProduto === product.IDProduto)
-				?.qtd,
+	const serverConfig = useServerConfig();
+	const selectedItem = useOrderStore((state) =>
+		state.selectedProducts.find((e) => e.idProduto === product.IDProduto),
 	);
+	const selectedQtd = selectedItem?.qtd;
+	const [pendingAdd, setPendingAdd] = useState<{
+		qtd: number;
+		notas: string;
+		mode: 'add' | 'set';
+	} | null>(null);
+
+	// Produto sem preço cadastrado e ainda sem preço informado neste pedido
+	const needsPrice =
+		String(serverConfig.AskPrice) === '1' &&
+		product.ValorUnitario === 0 &&
+		!selectedItem;
 
 	const [values, setValues] = useState({
 		amount: 1,
@@ -29,6 +42,11 @@ export const ExtraInfoModal = memo(function ExtraInfoModal({
 	});
 
 	const handleAddPress = useCallback(() => {
+		if (needsPrice) {
+			setPendingAdd({ qtd: 1, notas: '', mode: 'add' });
+			return;
+		}
+
 		actions.addSelectedProduct({
 			idProduto: product.IDProduto,
 			qtd: 1,
@@ -37,7 +55,7 @@ export const ExtraInfoModal = memo(function ExtraInfoModal({
 			nome: product.Nome,
 			valorUnitario: product.ValorUnitario,
 		});
-	}, [actions, product.IDProduto, product.Nome, product.ValorUnitario]);
+	}, [actions, needsPrice, product.IDProduto, product.Nome, product.ValorUnitario]);
 
 	const handleLongPress = useCallback(() => setVisible(true), []);
 
@@ -49,9 +67,13 @@ export const ExtraInfoModal = memo(function ExtraInfoModal({
 				title={product.Nome}
 				textStyles="h-16"
 			>
-				<Text className="absolute left-4 bottom-2.5 text-xs p-0.5">
-					{selectedQtd ?? ''}
-				</Text>
+				{!!selectedQtd && (
+					<View className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-500 items-center justify-center">
+						<Text className="text-white text-[11px] font-bold">
+							{selectedQtd}
+						</Text>
+					</View>
+				)}
 			</OptionButton>
 			<Modal
 				transparent
@@ -112,9 +134,7 @@ export const ExtraInfoModal = memo(function ExtraInfoModal({
 							numberOfLines={3}
 							textAlignVertical="top"
 							className="border border-zinc-200 rounded-lg px-3 py-2 text-zinc-800 min-h-20"
-							onChangeText={(v) =>
-								setValues((s) => ({ ...s, observation: v }))
-							}
+							onChangeText={(v) => setValues((s) => ({ ...s, observation: v }))}
 						/>
 
 						<View className="flex-row mt-5 items-center justify-end gap-3">
@@ -127,13 +147,24 @@ export const ExtraInfoModal = memo(function ExtraInfoModal({
 							<TouchableOpacity
 								className="px-5 py-2.5 rounded-lg bg-emerald-500"
 								onPress={() => {
+									if (needsPrice) {
+										setPendingAdd({
+											qtd: values.amount,
+											notas: values.observation,
+											mode: 'set',
+										});
+										setVisible(false);
+										return;
+									}
+
 									actions.setSelectedProduct({
 										idProduto: product.IDProduto,
 										qtd: values.amount,
 										viagem: 0,
 										notas: values.observation,
 										nome: product.Nome,
-										valorUnitario: product.ValorUnitario,
+										valorUnitario:
+											selectedItem?.valorUnitario || product.ValorUnitario,
 									});
 
 									setVisible(false);
@@ -145,6 +176,28 @@ export const ExtraInfoModal = memo(function ExtraInfoModal({
 					</View>
 				</View>
 			</Modal>
+			<PriceModal
+				visible={!!pendingAdd}
+				productName={product.Nome}
+				onCancel={() => setPendingAdd(null)}
+				onConfirm={(price) => {
+					if (!pendingAdd) return;
+
+					const item = {
+						idProduto: product.IDProduto,
+						qtd: pendingAdd.qtd,
+						viagem: 0,
+						notas: pendingAdd.notas,
+						nome: product.Nome,
+						valorUnitario: price,
+					};
+
+					if (pendingAdd.mode === 'set') actions.setSelectedProduct(item);
+					else actions.addSelectedProduct(item);
+
+					setPendingAdd(null);
+				}}
+			/>
 		</>
 	);
 });

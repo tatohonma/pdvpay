@@ -13,6 +13,7 @@ import {
 	View,
 } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppStore } from '../../store/useAppStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
 
@@ -28,6 +29,7 @@ export const SettingsScreen = () => {
 	const navigation = useNavigation();
 	const [visible, setVisible] = useState<boolean>(false);
 	const { pdv } = useAppStore();
+	const insets = useSafeAreaInsets();
 
 	return (
 		<View className="flex-1 bg-zinc-50">
@@ -145,15 +147,20 @@ export const SettingsScreen = () => {
 							</View>
 						</View>
 					</View>
-
-					<TouchableOpacity
-						className="mt-3 bg-emerald-500 items-center py-3 rounded-lg"
-						onPress={() => navigation.navigate('Auth')}
-					>
-						<Text className="font-semibold text-white">OK</Text>
-					</TouchableOpacity>
 				</View>
 			</ScrollView>
+
+			<View
+				className="px-4 pt-2 bg-zinc-50 w-full max-w-2xl self-center"
+				style={{ paddingBottom: insets.bottom + 8 }}
+			>
+				<TouchableOpacity
+					className="bg-emerald-500 items-center py-3 rounded-lg"
+					onPress={() => navigation.navigate('Auth')}
+				>
+					<Text className="font-semibold text-white">OK</Text>
+				</TouchableOpacity>
+			</View>
 
 			<Modal
 				transparent

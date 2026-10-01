@@ -69,6 +69,11 @@ export const CheckIn = (props: Props) => {
   const handleOpenCommand = async (data: z.infer<typeof schema>) => {
     try {
       const client = await getClient({ telefone: data.number });
+      if (!client?.length) {
+        setError("Cliente não encontrado!");
+        return;
+      }
+
       const response = await mutation.mutateAsync({
         ClienteID: client[0].IDCliente,
         Comanda: Number(number),
@@ -79,7 +84,7 @@ export const CheckIn = (props: Props) => {
       });
 
       const errorMsg = "Já existe comanda aberta para esse cliente";
-      if (response.Mensagem.includes(errorMsg)) {
+      if (response?.Mensagem?.includes(errorMsg)) {
         setError(response.Mensagem);
         return;
       }
@@ -99,12 +104,12 @@ export const CheckIn = (props: Props) => {
       });
     } catch (e) {
       setError("Ouve um erro ao abrir comanda!");
-      Alert.alert("Ok comanda aberta com successo", JSON.stringify(e));
+      Alert.alert("Erro ao abrir comanda", JSON.stringify(e));
     }
   };
 
   const onSubmit = async (data: z.infer<typeof schema>) => {
-    if (commandEntries) {
+    if (commandEntries?.length) {
       setOpen(true);
       return;
     }
@@ -146,7 +151,12 @@ export const CheckIn = (props: Props) => {
         {error && (
           <Text className="text-xs text-red-500 text-center">{error}</Text>
         )}
-        {mutation.isPending || (mutation.isPending && <ActivityIndicator />)}
+        {mutation.isPending && (
+          <View className="flex-row items-center justify-center gap-2">
+            <ActivityIndicator />
+            <Text className="text-xs text-zinc-500">Carregando...</Text>
+          </View>
+        )}
       </View>
 
       <Modal
@@ -161,7 +171,7 @@ export const CheckIn = (props: Props) => {
               Tipo de entrada
             </Text>
 
-            {commandEntries.map((entry: any) => {
+            {(commandEntries ?? []).map((entry: any) => {
               return (
                 <Pressable
                   key={entry.IDTipoEntrada}

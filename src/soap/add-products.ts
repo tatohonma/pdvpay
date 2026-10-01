@@ -5,6 +5,8 @@ interface ProductItem {
 	qtd: number;
 	viagem: number;
 	notas?: string;
+	/** Preço informado pelo usuário (config AskPrice = 1). Ainda não enviado na requisição. */
+	valorUnitario?: number;
 }
 
 export interface AddProductsParams {
@@ -38,6 +40,8 @@ export const addProducts = async (params: AddProductsParams) => {
 					qtd: p.qtd,
 					viagem: p.viagem,
 					notas: p.notas || '',
+					// TODO: enviar o preço informado (p.valorUnitario) quando o campo
+					// correspondente do AdicionarProdutos for validado.
 					listaModificacoes: { '#text': '' },
 				})),
 			},

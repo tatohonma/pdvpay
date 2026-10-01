@@ -5,7 +5,14 @@ import {
 	useRoute,
 } from '@react-navigation/native';
 import { useMutation } from '@tanstack/react-query';
-import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import {
+	Alert,
+	ScrollView,
+	Text,
+	ToastAndroid,
+	TouchableOpacity,
+	View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { v4 as uuidv4 } from 'uuid';
 import { type AddProductsParams, addProducts } from '../../soap/add-products';
@@ -32,8 +39,12 @@ export const OrderTab = () => {
 	const mutation = useMutation({
 		mutationFn: (newProducts: AddProductsParams) => addProducts(newProducts),
 		onSettled: () => actions.resetProducts(),
+		onError: () => {
+			ToastAndroid.show('Erro ao Enviar Pedido', ToastAndroid.LONG);
+		},
 		onSuccess: async (data) => {
 			if (data.status === 1) {
+				ToastAndroid.show('Pedido Enviado Com Sucesso', ToastAndroid.LONG);
 				if (serverConfig.AutenticarSempre === '1') {
 					navigation.reset({
 						index: 0,
@@ -47,6 +58,8 @@ export const OrderTab = () => {
 				});
 				return;
 			}
+
+			ToastAndroid.show('Erro ao Enviar Pedido', ToastAndroid.LONG);
 
 			if (data.retorno?.descricaoErro) {
 				Alert.alert(
@@ -112,8 +125,10 @@ export const OrderTab = () => {
 				<View className="px-2">
 					{selectedProducts.map((p) => {
 						return (
-							<View
+							<TouchableOpacity
 								key={p.idProduto}
+								activeOpacity={0.6}
+								onPress={() => actions.addSelectedProduct({ ...p, qtd: 1 })}
 								className="flex-row items-center justify-between py-1 gap-2"
 							>
 								<View className="flex-1 flex-row items-center gap-2">
@@ -143,7 +158,7 @@ export const OrderTab = () => {
 										{(p.valorUnitario * p.qtd).toFixed(2)}
 									</Text>
 								</View>
-							</View>
+							</TouchableOpacity>
 						);
 					})}
 				</View>

@@ -1,7 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigation } from '@react-navigation/native';
 import { Controller, useForm } from 'react-hook-form';
-import { ActivityIndicator, Text, View } from 'react-native';
+import {
+	ActivityIndicator,
+	Text,
+	TouchableOpacity,
+	View,
+} from 'react-native';
 import z from 'zod';
 import { Keypad } from '../../components/ui/keypad';
 import { ResponsiveScreen } from '../../components/ui/layout';
@@ -53,9 +58,17 @@ export const AuthScreen = () => {
 					<Text className="text-center text-red-600">
 						{authPdvMutation.error.message}
 					</Text>
-					<Text className="text-zinc-500 text-center font-light">
+					<Text className="text-zinc-500 text-center font-light mb-4">
 						Contate nossa equipe de suporte!
 					</Text>
+					<TouchableOpacity
+						className="px-5 py-2.5 rounded-lg bg-zinc-100 self-center"
+						onPress={() => navigation.navigate('Setup')}
+					>
+						<Text className="text-zinc-600 font-medium">
+							Alterar URL do servidor
+						</Text>
+					</TouchableOpacity>
 				</View>
 			)}
 			{!authPdvMutation.error && (
@@ -86,7 +99,12 @@ export const AuthScreen = () => {
 								Crendenciais inválidas!
 							</Text>
 						)}
-						{isLoading() && <ActivityIndicator />}
+						{isLoading() && (
+							<View className="flex-row items-center justify-center gap-2">
+								<ActivityIndicator />
+								<Text className="text-xs text-zinc-500">Carregando...</Text>
+							</View>
+						)}
 					</View>
 				</View>
 			)}

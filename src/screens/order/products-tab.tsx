@@ -8,6 +8,7 @@ import {
 	useWindowDimensions,
 	View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGetProducts, type Product } from '../../hooks/useGetProducts';
 import { getNumColumns } from '../../utils/columns';
 import { ExtraInfoModal } from './modal';
@@ -39,17 +40,21 @@ export const ProductsTab = () => {
 	const categoryId = useOrderStore((state) => state.categoryId);
 	const products = useGetProducts();
 	const { width } = useWindowDimensions();
+	const insets = useSafeAreaInsets();
 	const numColumns = getNumColumns(width);
 
 	const filteredProducts = useMemo(
 		() =>
-			products.data?.filter(
-				(p) =>
-					p.Disponibilidade &&
-					p.IDTipoProduto === 10 &&
-					(categoryId === 0 ||
-						p.Categorias.some((c) => c.IDCategoria === categoryId)),
-			) ?? [],
+			products.data
+				?.filter(
+					(p) =>
+						p.IDProduto > 4 &&
+						p.Disponibilidade &&
+						p.IDTipoProduto === 10 &&
+						(categoryId === 0 ||
+							p.Categorias.some((c) => c.IDCategoria === categoryId)),
+				)
+				.sort((a, b) => a.Nome.localeCompare(b.Nome, 'pt-BR')) ?? [],
 		[products.data, categoryId],
 	);
 
@@ -93,6 +98,7 @@ export const ProductsTab = () => {
 			key={numColumns}
 			className="p-1"
 			contentContainerClassName="flex-grow"
+			contentContainerStyle={{ paddingBottom: insets.bottom }}
 			data={filteredProducts}
 			keyExtractor={(p) => String(p.IDProduto)}
 			numColumns={numColumns}

@@ -1,6 +1,8 @@
 import type { StaticScreenProps } from '@react-navigation/native';
+import { useEffect, useLayoutEffect } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { SceneMap, TabBar, TabView } from 'react-native-tab-view';
+import { useOrderStoreActions } from '../../store/useOrderStore';
 import { ProductsTab } from './products-tab';
 import { useTabStore } from './useTabStore';
 import { CategoryTab } from './category-tab';
@@ -26,6 +28,16 @@ type Props = StaticScreenProps<{
 export const OrderScreen = (_props: Props) => {
 	const layout = useWindowDimensions();
 	const { index, setIndex } = useTabStore();
+	const { resetProducts } = useOrderStoreActions();
+
+	useLayoutEffect(() => {
+		setIndex(0);
+	}, [setIndex]);
+
+	useEffect(() => {
+		resetProducts();
+		return () => resetProducts();
+	}, [resetProducts]);
 
 	return (
 		<TabView

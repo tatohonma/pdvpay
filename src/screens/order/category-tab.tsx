@@ -4,6 +4,7 @@ import {
 	type ListRenderItemInfo,
 	useWindowDimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { OptionButton } from '../../components/ui/option-button';
 import { useGetCategories } from '../../hooks/useGetCategories';
 import { useOrderStoreActions } from '../../store/useOrderStore';
@@ -22,10 +23,16 @@ export const CategoryTab = () => {
 	const categories = useGetCategories();
 	const actions = useOrderStoreActions();
 	const { width } = useWindowDimensions();
+	const insets = useSafeAreaInsets();
 	const numColumns = getNumColumns(width);
 
 	const data = useMemo(
-		() => [ALL_CATEGORY, ...(categories.data ?? [])],
+		() => [
+			ALL_CATEGORY,
+			...[...(categories.data ?? [])].sort((a, b) =>
+				a.Nome.localeCompare(b.Nome, 'pt-BR'),
+			),
+		],
 		[categories.data],
 	);
 
@@ -51,6 +58,7 @@ export const CategoryTab = () => {
 		<FlatList
 			key={numColumns}
 			className="p-1"
+			contentContainerStyle={{ paddingBottom: insets.bottom }}
 			data={data}
 			keyExtractor={(c) => String(c.IDCategoria)}
 			numColumns={numColumns}

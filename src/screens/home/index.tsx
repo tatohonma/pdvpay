@@ -137,8 +137,13 @@ export const HomeScreen = () => {
               {form.formState.errors.number?.message ?? error}
             </Text>
           )}
-          {validateTableMutation.isPending ||
-            (validateCommandMutation.isPending && <ActivityIndicator />)}
+          {(validateTableMutation.isPending ||
+            validateCommandMutation.isPending) && (
+            <View className="flex-row items-center justify-center gap-2">
+              <ActivityIndicator />
+              <Text className="text-xs text-zinc-500">Carregando...</Text>
+            </View>
+          )}
         </View>
       </View>
     </ResponsiveScreen>
