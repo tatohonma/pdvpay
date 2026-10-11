@@ -1,14 +1,33 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-type addProductsProps = {
+export type OrderProductModifier = {
+	idProduto: number;
+	nome: string;
+	valor: number;
+};
+
+export type SelectedProduct = {
+	/** Identifica a combinação produto + observação + modificadores. */
+	groupKey: string;
 	idProduto: number;
 	qtd: number;
 	viagem: number;
 	notas?: string;
 	nome: string;
 	valorUnitario: number;
+	modificacoes: OrderProductModifier[];
 };
+
+export type AddProductInput = Omit<SelectedProduct, 'groupKey'>;
+
+// Mesmo produto com observação/modificadores diferentes vira outra linha do pedido
+const buildProductKey = (product: AddProductInput) =>
+	JSON.stringify([
+		product.idProduto,
+		product.notas?.trim() || '',
+		product.modificacoes.map((m) => m.idProduto).sort((a, b) => a - b),
+	]);
 
 export type currentOrderInfoProps = {
 	guidIdentificacao: string;
@@ -30,9 +49,8 @@ export type currentOrderInfoProps = {
 
 type OrderStoreActions = {
 	setCurrentOrderInfo: (order: currentOrderInfoProps) => void;
-	addSelectedProduct: (product: addProductsProps) => void;
-	setSelectedProduct: (product: addProductsProps) => void;
-	removeSelectedProduct: (id: number) => void;
+	addSelectedProduct: (product: AddProductInput) => void;
+	removeSelectedProduct: (groupKey: string) => void;
 	resetProducts: () => void;
 	setLocationRef: (ref: string) => void;
 	setCategoryId: (id: number) => void;
@@ -40,7 +58,7 @@ type OrderStoreActions = {
 
 type OrderStoreProps = {
 	currentOrderInfo: currentOrderInfoProps | null;
-	selectedProducts: addProductsProps[];
+	selectedProducts: SelectedProduct[];
 	actions: OrderStoreActions;
 	categoryId: number;
 };
@@ -64,49 +82,31 @@ export const useOrderStore = create<OrderStoreProps>()(
 				}),
 			addSelectedProduct: (product) =>
 				set((state) => {
+					const groupKey = buildProductKey(product);
 					const existentProduct = state.selectedProducts.find(
-						(e) => e.idProduto === product.idProduto,
+						(e) => e.groupKey === groupKey,
 					);
 
 					if (!existentProduct) {
-						state.selectedProducts.push(product);
+						state.selectedProducts.push({ ...product, groupKey });
 						return;
 					}
 
 					existentProduct.qtd += product.qtd;
 				}),
-			setSelectedProduct: (product) =>
+			removeSelectedProduct: (groupKey) =>
 				set((state) => {
 					const existentProduct = state.selectedProducts.find(
-						(e) => e.idProduto === product.idProduto,
+						(e) => e.groupKey === groupKey,
 					);
 
-					if (!existentProduct) {
-						state.selectedProducts.push(product);
-						return;
-					}
-
-					if (product.qtd === 0) {
-						state.selectedProducts = state.selectedProducts.filter(
-							(e) => e.idProduto !== product.idProduto,
-						);
-					}
-
-					existentProduct.qtd = product.qtd;
-				}),
-			removeSelectedProduct: (id) =>
-				set((state) => {
-					const existentProduct = state.selectedProducts.find(
-						(e) => e.idProduto === id,
-					);
-
-					if (existentProduct && existentProduct?.qtd > 1) {
+					if (existentProduct && existentProduct.qtd > 1) {
 						existentProduct.qtd = existentProduct.qtd - 1;
 						return;
 					}
 
 					state.selectedProducts = state.selectedProducts.filter(
-						(e) => e.idProduto !== id,
+						(e) => e.groupKey !== groupKey,
 					);
 				}),
 

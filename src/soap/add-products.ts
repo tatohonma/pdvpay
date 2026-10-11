@@ -7,6 +7,7 @@ interface ProductItem {
 	notas?: string;
 	/** Preço informado pelo usuário (config AskPrice = 1). Ainda não enviado na requisição. */
 	valorUnitario?: number;
+	modificacoes?: { idProduto: number }[];
 }
 
 export interface AddProductsParams {
@@ -42,7 +43,13 @@ export const addProducts = async (params: AddProductsParams) => {
 					notas: p.notas || '',
 					// TODO: enviar o preço informado (p.valorUnitario) quando o campo
 					// correspondente do AdicionarProdutos for validado.
-					listaModificacoes: { '#text': '' },
+					listaModificacoes: p.modificacoes?.length
+						? {
+								PedidoProduto: p.modificacoes.map((m) => ({
+									idProduto: m.idProduto,
+								})),
+							}
+						: { '#text': '' },
 				})),
 			},
 		},

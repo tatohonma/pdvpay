@@ -124,27 +124,47 @@ export const OrderTab = () => {
 			<ScrollView>
 				<View className="px-2">
 					{selectedProducts.map((p) => {
+						const notas = p.notas?.trim();
+
 						return (
 							<TouchableOpacity
-								key={p.idProduto}
+								key={p.groupKey}
 								activeOpacity={0.6}
 								onPress={() => actions.addSelectedProduct({ ...p, qtd: 1 })}
 								className="flex-row items-center justify-between py-1 gap-2"
 							>
 								<View className="flex-1 flex-row items-center gap-2">
 									<TouchableOpacity
-										onPress={() => actions.removeSelectedProduct(p.idProduto)}
+										onPress={() => actions.removeSelectedProduct(p.groupKey)}
 									>
 										<Lucide name="circle-x" size={20} color="red" />
 									</TouchableOpacity>
-									<Text
-										numberOfLines={1}
-										ellipsizeMode="tail"
-										maxFontSizeMultiplier={1.3}
-										className="flex-1 text-zinc-600"
-									>
-										{p.nome}
-									</Text>
+									<View className="flex-1">
+										<Text
+											numberOfLines={1}
+											ellipsizeMode="tail"
+											maxFontSizeMultiplier={1.3}
+											className="text-zinc-600"
+										>
+											{p.nome}
+										</Text>
+										{p.modificacoes.length > 0 && (
+											<Text
+												maxFontSizeMultiplier={1.3}
+												className="text-xs text-zinc-500"
+											>
+												{p.modificacoes.map((m) => `+ ${m.nome}`).join(', ')}
+											</Text>
+										)}
+										{!!notas && (
+											<Text
+												maxFontSizeMultiplier={1.3}
+												className="text-xs italic text-zinc-500"
+											>
+												Obs: {notas}
+											</Text>
+										)}
+									</View>
 								</View>
 								<View className="flex-row items-center gap-3 w-1/3 md:w-1/4">
 									<Text maxFontSizeMultiplier={1.3} className="text-zinc-600">
@@ -163,10 +183,7 @@ export const OrderTab = () => {
 					})}
 				</View>
 			</ScrollView>
-			<View
-				className="items-center"
-				style={{ paddingBottom: insets.bottom }}
-			>
+			<View className="items-center" style={{ paddingBottom: insets.bottom }}>
 				<TouchableOpacity
 					onPress={async () => {
 						await mutation.mutateAsync({

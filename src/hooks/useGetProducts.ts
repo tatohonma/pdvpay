@@ -2,12 +2,6 @@ import { useQuery } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import { api } from '../config/axios';
 
-type categoriesType = {
-	IDCategoria: number;
-	Nome: string;
-	Disponibilidade: boolean;
-};
-
 export interface Product {
 	IDProduto: number;
 	IDTipoProduto: number;
@@ -16,10 +10,37 @@ export interface Product {
 	ValorUnitario: number;
 	Ativo: boolean;
 	Excluido: boolean;
-	DtUltimaAlteracao: Date;
+	DtUltimaAlteracao: string;
 	Disponibilidade: boolean;
-	DtAlteracaoDisponibilidade: Date;
-	Categorias: categoriesType[];
+	DtAlteracaoDisponibilidade: string;
+	Categorias: Categoria[];
+	PaineisDeModificacao: PainelDeModificacao[];
+	AreasDeImpressao: AreaDeImpressao[];
+}
+
+export interface Categoria {
+	IDCategoria: number;
+	Nome: string;
+	Disponibilidade: boolean;
+}
+
+export interface PainelDeModificacao {
+	IDPainelModificacao: number;
+	Nome: string;
+	Titulo: string;
+	Produtos: ProdutoModificacao[];
+}
+
+export interface ProdutoModificacao {
+	IDProduto: number;
+	Valor: number;
+	Ordem: number;
+}
+
+export interface AreaDeImpressao {
+	IDAreaImpressao: number;
+	Nome: string;
+	IDTIpo: number;
 }
 
 export const productsQueryOptions = {
@@ -27,14 +48,10 @@ export const productsQueryOptions = {
 	queryFn: async (): Promise<Product[]> => {
 		const response = await api.get(`/api/produtos`, {
 			params: {
-				id: 0,
-				tipo: 0,
-				ativo: 'all',
-				disponivel: 'all',
-				categoria: 0,
+				tipo: 10,
 			},
 		});
-
+		console.log('response.data', JSON.stringify(response.data, null, 2));
 		return response.data;
 	},
 };
@@ -43,5 +60,35 @@ export const useGetProducts = () => {
 	return useQuery<Product[], AxiosError<{ Mensagem: string }>>({
 		retry: 0,
 		...productsQueryOptions,
+	});
+};
+
+// Os modificadores são produtos de outro tipo; o painel só traz o IDProduto,
+// então o nome vem desta lista.
+export const modifierProductsQueryOptions = {
+	queryKey: ['products', 'modifiers'],
+	queryFn: async (): Promise<Product[]> => {
+		const response = await api.get(`/api/produtos`, {
+			params: {
+				tipo: 20,
+			},
+		});
+
+		return response.data;
+	},
+};
+
+const toProductMap = (products: Product[]) =>
+	new Map(products.map((p) => [p.IDProduto, p]));
+
+export const useModifierProducts = () => {
+	return useQuery<
+		Product[],
+		AxiosError<{ Mensagem: string }>,
+		Map<number, Product>
+	>({
+		retry: 0,
+		select: toProductMap,
+		...modifierProductsQueryOptions,
 	});
 };
