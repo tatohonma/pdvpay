@@ -5,8 +5,9 @@ interface ProductItem {
 	qtd: number;
 	viagem: number;
 	notas?: string;
-	/** Preço informado pelo usuário (config AskPrice = 1). Ainda não enviado na requisição. */
 	valorUnitario?: number;
+	/** Preço informado pelo usuário (config AskPrice = 1); envia `valor` na requisição. */
+	valorInformado?: boolean;
 	modificacoes?: { idProduto: number }[];
 }
 
@@ -40,9 +41,11 @@ export const addProducts = async (params: AddProductsParams) => {
 					idProduto: p.idProduto,
 					qtd: p.qtd,
 					viagem: p.viagem,
+					...(p.valorInformado &&
+						p.valorUnitario !== undefined && {
+							valor: p.valorUnitario.toFixed(2).replace('.', ','),
+						}),
 					notas: p.notas || '',
-					// TODO: enviar o preço informado (p.valorUnitario) quando o campo
-					// correspondente do AdicionarProdutos for validado.
 					listaModificacoes: p.modificacoes?.length
 						? {
 								PedidoProduto: p.modificacoes.map((m) => ({

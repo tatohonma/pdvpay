@@ -27,7 +27,7 @@ type ModalProduct = Pick<
 	'IDProduto' | 'Nome' | 'ValorUnitario' | 'PaineisDeModificacao'
 >;
 
-type PendingItem = Omit<AddProductInput, 'valorUnitario'>;
+type PendingItem = Omit<AddProductInput, 'valorUnitario' | 'valorInformado'>;
 
 interface extraInfoModalProps {
 	product: ModalProduct;
@@ -59,9 +59,10 @@ export const ExtraInfoModal = memo(function ExtraInfoModal({
 		(p) => p.Produtos?.length > 0,
 	);
 
-	// Produto sem preço cadastrado e ainda sem preço informado neste pedido
-	const needsPrice =
-		askPrice && product.ValorUnitario === 0 && informedPrice === undefined;
+	// Produto sem preço cadastrado: o preço é informado pelo operador
+	const asksPrice = askPrice && product.ValorUnitario === 0;
+	// Pergunta só na primeira vez; as próximas linhas reaproveitam o preço informado
+	const needsPrice = asksPrice && informedPrice === undefined;
 
 	const addItem = useCallback(
 		(item: PendingItem) => {
@@ -73,9 +74,10 @@ export const ExtraInfoModal = memo(function ExtraInfoModal({
 			actions.addSelectedProduct({
 				...item,
 				valorUnitario: informedPrice ?? product.ValorUnitario,
+				valorInformado: asksPrice,
 			});
 		},
-		[actions, needsPrice, informedPrice, product.ValorUnitario],
+		[actions, needsPrice, asksPrice, informedPrice, product.ValorUnitario],
 	);
 
 	const handleAddPress = useCallback(() => {
@@ -128,7 +130,11 @@ export const ExtraInfoModal = memo(function ExtraInfoModal({
 					productName={product.Nome}
 					onCancel={() => setPendingAdd(null)}
 					onConfirm={(price) => {
-						actions.addSelectedProduct({ ...pendingAdd, valorUnitario: price });
+						actions.addSelectedProduct({
+							...pendingAdd,
+							valorUnitario: price,
+							valorInformado: true,
+						});
 						setPendingAdd(null);
 					}}
 				/>

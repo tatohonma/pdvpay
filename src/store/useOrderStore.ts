@@ -16,6 +16,8 @@ export type SelectedProduct = {
 	notas?: string;
 	nome: string;
 	valorUnitario: number;
+	/** Preço digitado pelo operador (AskPrice = 1); só nesse caso é enviado ao servidor. */
+	valorInformado?: boolean;
 	modificacoes: OrderProductModifier[];
 };
 
