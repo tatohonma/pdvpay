@@ -46,14 +46,10 @@ export const HomeScreen = () => {
     },
   });
 
-  const shouldRedirectCheckin = (msg: string) => {
-    const query =
-      msg.includes("[B101] Comanda com checkin fechada!") &&
-      AbrirComanda === "SIM";
-
-    if (query) return true;
-    return false;
-  };
+  // SIM: check-in só com cliente cadastrado; NOVO: também cadastra cliente novo
+  const shouldRedirectCheckin = (msg: string) =>
+    msg.includes("[B101] Comanda com checkin fechada!") &&
+    (AbrirComanda === "SIM" || AbrirComanda === "NOVO");
 
   const validateTableMutation = useValidateTable({
     onSuccess: (data) => {
