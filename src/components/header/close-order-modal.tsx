@@ -198,7 +198,14 @@ export const CloseOrderModal = () => {
 	);
 
 	const closeOrderMutation = useAskCloseOrderMutation({
-		onSuccess: () => {
+		onSuccess: (data) => {
+			if (data.status !== 1) {
+				Alert.alert(
+					'Erro ao fechar conta',
+					data.descricaoErro ?? 'O servidor não confirmou o fechamento.',
+				);
+				return;
+			}
 			navigateAfterClose();
 		},
 		onError: () => {
@@ -235,7 +242,7 @@ export const CloseOrderModal = () => {
 			idTipoPedido: Number(currentOrderInfo?.idTipoPedido),
 			idUsuario: Number(user.id),
 			impressaoConta: 2,
-			infoMesa: 0,
+			infoMesa: 1,
 			numero: Number(params.number),
 			quantidadePessoas: data.people_number,
 		});
