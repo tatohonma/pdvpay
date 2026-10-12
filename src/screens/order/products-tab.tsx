@@ -1,17 +1,23 @@
 import { Lucide } from '@react-native-vector-icons/lucide';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
 	ActivityIndicator,
 	FlatList,
 	type ListRenderItemInfo,
 	Text,
+	TextInput,
+	TouchableOpacity,
 	useWindowDimensions,
 	View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useGetProducts, type Product } from '../../hooks/useGetProducts';
+import {
+	useGetProducts,
+	useModifierProducts,
+	type Product,
+} from '../../hooks/useGetProducts';
 import { getNumColumns } from '../../utils/columns';
-import { compareByName } from '../../utils/sort';
+import { compareByName, normalizeText } from '../../utils/sort';
 import { ExtraInfoModal } from './modal';
 import { useOrderStore } from '../../store/useOrderStore';
 
@@ -40,22 +46,35 @@ const StateMessage = ({
 export const ProductsTab = () => {
 	const categoryId = useOrderStore((state) => state.categoryId);
 	const products = useGetProducts();
+	const modifierProducts = useModifierProducts();
+	const [search, setSearch] = useState('');
 	const { width } = useWindowDimensions();
 	const insets = useSafeAreaInsets();
 	const numColumns = getNumColumns(width);
 
-	// Filtra e ordena uma única vez por carga; trocar de categoria só refiltra
+	// A busca vale só para a categoria atual; ao trocar de categoria, recomeça
+	useEffect(() => {
+		setSearch('');
+	}, [categoryId]);
+
+	// Filtra e ordena uma única vez por carga; trocar de categoria só refiltra.
+	// Modificadores também chegam na lista de produtos, mas só são vendidos
+	// dentro dos painéis de modificação.
 	const sellableProducts = useMemo(
 		() =>
 			(products.data ?? [])
 				.filter(
-					(p) => p.IDProduto > 4 && p.Disponibilidade && p.IDTipoProduto === 10,
+					(p) =>
+						p.IDProduto > 4 &&
+						p.Disponibilidade &&
+						p.IDTipoProduto === 10 &&
+						!modifierProducts.data?.has(p.IDProduto),
 				)
 				.sort(compareByName),
-		[products.data],
+		[products.data, modifierProducts.data],
 	);
 
-	const filteredProducts = useMemo(
+	const categoryProducts = useMemo(
 		() =>
 			categoryId === 0
 				? sellableProducts
@@ -64,6 +83,12 @@ export const ProductsTab = () => {
 					),
 		[sellableProducts, categoryId],
 	);
+
+	const filteredProducts = useMemo(() => {
+		const term = normalizeText(search.trim());
+		if (!term) return categoryProducts;
+		return categoryProducts.filter((p) => normalizeText(p.Nome).includes(term));
+	}, [categoryProducts, search]);
 
 	const renderItem = useCallback(
 		({ item }: ListRenderItemInfo<Product>) => <ExtraInfoModal product={item} />,
@@ -95,26 +120,55 @@ export const ProductsTab = () => {
 			<StateMessage
 				icon={<Lucide name="package-search" size={40} color="#a1a1aa" />}
 				title="Nenhum produto encontrado"
-				subtitle="Não há produtos disponíveis para essa categoria"
+				subtitle={
+					search.trim()
+						? `Nenhum produto corresponde a "${search.trim()}"`
+						: 'Não há produtos disponíveis para essa categoria'
+				}
 			/>
 		);
 	};
 
 	return (
-		<FlatList
-			key={numColumns}
-			className="p-1"
-			contentContainerClassName="flex-grow"
-			contentContainerStyle={{ paddingBottom: insets.bottom }}
-			data={filteredProducts}
-			keyExtractor={(p) => String(p.IDProduto)}
-			numColumns={numColumns}
-			renderItem={renderItem}
-			ListEmptyComponent={renderEmptyState}
-			initialNumToRender={20}
-			maxToRenderPerBatch={20}
-			windowSize={9}
-			removeClippedSubviews
-		/>
+		<View className="flex-1">
+			<View className="flex-row items-center gap-2 mx-2 mt-2 mb-1 h-11 rounded-lg bg-zinc-100 px-3">
+				<Lucide name="search" size={18} color="#a1a1aa" />
+				<TextInput
+					value={search}
+					onChangeText={setSearch}
+					placeholder="Buscar produto"
+					placeholderTextColor="#a1a1aa"
+					autoCorrect={false}
+					returnKeyType="search"
+					className="flex-1 text-zinc-800"
+				/>
+				{search.length > 0 && (
+					<TouchableOpacity
+						onPress={() => setSearch('')}
+						hitSlop={8}
+						accessibilityLabel="Limpar busca"
+					>
+						<Lucide name="x" size={18} color="#a1a1aa" />
+					</TouchableOpacity>
+				)}
+			</View>
+			<FlatList
+				key={numColumns}
+				className="p-1"
+				contentContainerClassName="flex-grow"
+				contentContainerStyle={{ paddingBottom: insets.bottom }}
+				data={filteredProducts}
+				keyExtractor={(p) => String(p.IDProduto)}
+				numColumns={numColumns}
+				renderItem={renderItem}
+				ListEmptyComponent={renderEmptyState}
+				initialNumToRender={20}
+				maxToRenderPerBatch={20}
+				windowSize={9}
+				removeClippedSubviews
+				keyboardShouldPersistTaps="handled"
+				keyboardDismissMode="on-drag"
+			/>
+		</View>
 	);
 };
