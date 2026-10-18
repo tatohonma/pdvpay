@@ -28,11 +28,19 @@ type Props = StaticScreenProps<{
 export const OrderScreen = (_props: Props) => {
 	const layout = useWindowDimensions();
 	const { index, setIndex } = useTabStore();
-	const { resetProducts } = useOrderStoreActions();
+	const { resetProducts, setCategoryId } = useOrderStoreActions();
 
+	// A aba e a categoria ficam em stores globais: zera ao entrar e também ao
+	// sair, para o TabView já montar na aba Categorias na próxima mesa/comanda
 	useLayoutEffect(() => {
-		setIndex(0);
-	}, [setIndex]);
+		const reset = () => {
+			setIndex(0);
+			setCategoryId(0);
+		};
+
+		reset();
+		return reset;
+	}, [setIndex, setCategoryId]);
 
 	useEffect(() => {
 		resetProducts();

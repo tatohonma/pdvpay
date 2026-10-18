@@ -38,7 +38,10 @@ export const AuthScreen = () => {
 			return;
 		}
 
-		authMutation.mutate({ password: data.password });
+		authMutation.mutate(
+			{ password: data.password },
+			{ onError: () => form.setValue('password', '') },
+		);
 	};
 
 	const isLoading = () => {

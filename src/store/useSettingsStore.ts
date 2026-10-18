@@ -35,6 +35,8 @@ type SettingsState = {
 	serverConfig: ServerConfig;
 	terminalTab: boolean;
 	ambientePos: boolean;
+	/** Mostra um painel de modificação por vez, avançando com "Continuar". */
+	advancedModifierPanel: boolean;
 	homeMenuItems: {
 		mesa: boolean;
 		comanda: boolean;
@@ -45,6 +47,7 @@ type SettingsState = {
 		toggleHomeMenu: (key: keyof SettingsState['homeMenuItems']) => void;
 		toggleTerminalTab: () => void;
 		toggleAmbientePos: () => void;
+		toggleAdvancedModifierPanel: () => void;
 		updateServerConfig: (
 			config: { chave: ServerConfigKeys; valor: string | null }[],
 		) => void;
@@ -57,6 +60,7 @@ export const useSettingsStore = create<SettingsState>()(
 			serverURL: undefined,
 			terminalTab: false,
 			ambientePos: false,
+			advancedModifierPanel: false,
 			serverConfig: {},
 			homeMenuItems: {
 				mesa: true,
@@ -87,6 +91,12 @@ export const useSettingsStore = create<SettingsState>()(
 					});
 				},
 
+				toggleAdvancedModifierPanel: () => {
+					set((state) => {
+						state.advancedModifierPanel = !state.advancedModifierPanel;
+					});
+				},
+
 				updateServerConfig: (config) =>
 					set((state) => {
 						config.forEach((item) => {
@@ -103,6 +113,7 @@ export const useSettingsStore = create<SettingsState>()(
 				homeMenuItems: state.homeMenuItems,
 				terminalTab: state.terminalTab,
 				ambientePos: state.ambientePos,
+				advancedModifierPanel: state.advancedModifierPanel,
 			}),
 		},
 	),

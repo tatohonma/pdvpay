@@ -25,6 +25,7 @@ export const SettingsScreen = () => {
 		serverConfig,
 		terminalTab,
 		ambientePos,
+		advancedModifierPanel,
 	} = useSettingsStore();
 	const navigation = useNavigation();
 	const [visible, setVisible] = useState<boolean>(false);
@@ -92,6 +93,23 @@ export const SettingsScreen = () => {
 								thumbColor="#fff"
 								value={ambientePos}
 								onValueChange={() => actions.toggleAmbientePos()}
+							/>
+						</View>
+
+						<View className="flex-row items-center justify-between border-b border-b-zinc-100 px-3.5 py-3">
+							<View className="flex-1 mr-3">
+								<Text className="text-zinc-700">
+									Painel de modificações avançado
+								</Text>
+								<Text className="text-xs text-zinc-400">
+									Mostra um painel de modificação por vez
+								</Text>
+							</View>
+							<Switch
+								trackColor={{ true: '#10b981' }}
+								thumbColor="#fff"
+								value={advancedModifierPanel}
+								onValueChange={() => actions.toggleAdvancedModifierPanel()}
 							/>
 						</View>
 

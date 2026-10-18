@@ -47,14 +47,24 @@ export const HomeScreen = () => {
   });
 
   // SIM: check-in só com cliente cadastrado; NOVO: também cadastra cliente novo
+  // Em erro o número sai do input, para o próximo já ser digitado do zero
+  const fail = (message: string) => {
+    setError(message);
+    form.setValue("number", "");
+  };
+
+  const handleRequestError = () =>
+    fail("Não foi possível validar o número. Tente novamente.");
+
   const shouldRedirectCheckin = (msg: string) =>
     msg.includes("[B101] Comanda com checkin fechada!") &&
     (AbrirComanda === "SIM" || AbrirComanda === "NOVO");
 
   const validateTableMutation = useValidateTable({
+    onError: handleRequestError,
     onSuccess: (data) => {
       if (data?.descricaoErro) {
-        setError(data?.descricaoErro);
+        fail(data.descricaoErro);
         return;
       }
 
@@ -67,6 +77,7 @@ export const HomeScreen = () => {
   });
 
   const validateCommandMutation = useValidateCommand({
+    onError: handleRequestError,
     onSuccess: (data) => {
       if (data?.descricaoErro) {
         if (shouldRedirectCheckin(data?.descricaoErro)) {
@@ -77,7 +88,7 @@ export const HomeScreen = () => {
           return;
         }
 
-        setError(data?.descricaoErro);
+        fail(data.descricaoErro);
         return;
       }
 
@@ -89,13 +100,13 @@ export const HomeScreen = () => {
     },
   });
 
-  const onSubmit = async ({ number }: z.infer<typeof schema>) => {
+  const onSubmit = ({ number }: z.infer<typeof schema>) => {
     if (active === "mesa") {
-      await validateTableMutation.mutateAsync(number);
+      validateTableMutation.mutate(number);
     }
 
     if (active === "comanda") {
-      await validateCommandMutation.mutateAsync(number);
+      validateCommandMutation.mutate(number);
     }
   };
 

@@ -58,14 +58,16 @@ export const ProductsTab = () => {
 	}, [categoryId]);
 
 	// Filtra e ordena uma única vez por carga; trocar de categoria só refiltra.
-	// Modificadores também chegam na lista de produtos, mas só são vendidos
-	// dentro dos painéis de modificação.
+	// Excluídos, inativos e indisponíveis não são vendidos. Modificadores também
+	// chegam na lista de produtos, mas só são vendidos dentro dos painéis de modificação.
 	const sellableProducts = useMemo(
 		() =>
 			(products.data ?? [])
 				.filter(
 					(p) =>
 						p.IDProduto > 4 &&
+						!p.Excluido &&
+						p.Ativo &&
 						p.Disponibilidade &&
 						p.IDTipoProduto === 10 &&
 						!modifierProducts.data?.has(p.IDProduto),
@@ -152,8 +154,10 @@ export const ProductsTab = () => {
 					</TouchableOpacity>
 				)}
 			</View>
+			{/* Remonta ao trocar de categoria: a lista volta ao topo em vez de manter
+			    o scroll da categoria anterior, que deixava listas curtas em branco */}
 			<FlatList
-				key={numColumns}
+				key={`${numColumns}-${categoryId}`}
 				className="p-1"
 				contentContainerClassName="flex-grow"
 				contentContainerStyle={{ paddingBottom: insets.bottom }}
@@ -165,7 +169,8 @@ export const ProductsTab = () => {
 				initialNumToRender={20}
 				maxToRenderPerBatch={20}
 				windowSize={9}
-				removeClippedSubviews
+				// Sem removeClippedSubviews: no Android, com a aba fora da tela, ele
+				// desanexa os itens e a lista fica em branco até rolar
 				keyboardShouldPersistTaps="handled"
 				keyboardDismissMode="on-drag"
 			/>

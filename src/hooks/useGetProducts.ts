@@ -14,7 +14,8 @@ export interface Product {
 	Disponibilidade: boolean;
 	DtAlteracaoDisponibilidade: string;
 	Categorias: Categoria[];
-	PaineisDeModificacao: PainelDeModificacao[];
+	/** A API pode mandar painéis null no meio da lista. */
+	PaineisDeModificacao: (PainelDeModificacao | null)[];
 	AreasDeImpressao: AreaDeImpressao[];
 }
 
@@ -28,6 +29,10 @@ export interface PainelDeModificacao {
 	IDPainelModificacao: number;
 	Nome: string;
 	Titulo: string;
+	/** Mínimo de opções selecionadas; ausente = opcional. */
+	Min?: number;
+	/** Máximo de opções selecionadas; ausente = sem limite. */
+	Max?: number;
 	Produtos: ProdutoModificacao[];
 }
 
@@ -51,7 +56,6 @@ export const productsQueryOptions = {
 				tipo: 10,
 			},
 		});
-		console.log('response.data', JSON.stringify(response.data, null, 2));
 		return response.data;
 	},
 };

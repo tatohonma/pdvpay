@@ -65,7 +65,6 @@ export const CategoryTab = () => {
 			initialNumToRender={20}
 			maxToRenderPerBatch={20}
 			windowSize={9}
-			removeClippedSubviews
 		/>
 	);
 };

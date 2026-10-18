@@ -131,12 +131,18 @@ export const CheckIn = (props: Props) => {
     },
   });
 
+  // Em erro o documento/telefone sai do input, para ser digitado de novo
+  const fail = (message: string) => {
+    setError(message);
+    form.setValue("number", "");
+  };
+
   const run = async (fn: () => Promise<void>) => {
     setLoading(true);
     try {
       await fn();
     } catch (e) {
-      setError("Ouve um erro ao abrir comanda!");
+      fail("Ouve um erro ao abrir comanda!");
       Alert.alert("Erro ao abrir comanda", JSON.stringify(e));
     } finally {
       setLoading(false);
@@ -159,7 +165,7 @@ export const CheckIn = (props: Props) => {
 
     const errorMsg = "Já existe comanda aberta para esse cliente";
     if (validation?.Mensagem?.includes(errorMsg)) {
-      setError(validation.Mensagem);
+      fail(validation.Mensagem);
       return;
     }
 
@@ -168,7 +174,7 @@ export const CheckIn = (props: Props) => {
     // Carrega os dados do pedido da comanda recém-aberta, como faz a Home
     const order = await validateCommand(number);
     if (order?.descricaoErro) {
-      setError(order.descricaoErro);
+      fail(order.descricaoErro);
       return;
     }
 
@@ -193,7 +199,7 @@ export const CheckIn = (props: Props) => {
     run(async () => {
       const value = onlyDigits(data.number);
       if (!value) {
-        setError(`Informe o ${clientString.toLowerCase()}`);
+        fail(`Informe o ${clientString.toLowerCase()}`);
         return;
       }
 
@@ -210,7 +216,7 @@ export const CheckIn = (props: Props) => {
         return;
       }
 
-      setError("Cliente não encontrado!");
+      fail("Cliente não encontrado!");
     });
 
   const handleCreateClient = () =>
