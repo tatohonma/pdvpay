@@ -30,7 +30,9 @@ export const CategoryTab = () => {
 	const data = useMemo(
 		() => [
 			ALL_CATEGORY,
-			...[...(categories.data ?? [])].sort(compareByName),
+			...(categories.data ?? [])
+				.filter((c) => c.Disponibilidade)
+				.sort(compareByName),
 		],
 		[categories.data],
 	);

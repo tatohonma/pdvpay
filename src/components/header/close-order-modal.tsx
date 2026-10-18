@@ -241,7 +241,7 @@ export const CloseOrderModal = () => {
 			idTipoPagamento: 1,
 			idTipoPedido: Number(currentOrderInfo?.idTipoPedido),
 			idUsuario: Number(user.id),
-			impressaoConta: 2,
+			impressaoConta: Number(serverConfig.ImpressaoConta) || 0,
 			infoMesa: 1,
 			numero: Number(params.number),
 			quantidadePessoas: data.people_number,

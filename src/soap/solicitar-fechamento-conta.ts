@@ -10,6 +10,7 @@ type SolicitarFechamentoContaParams = {
 	quantidadePessoas: number;
 	idTipoPagamento: number;
 	infoMesa: number;
+	/** Área de impressão da conta (config ImpressaoConta); 0 = área "Conta Padrão" do servidor. */
 	impressaoConta: number;
 };
 
@@ -31,7 +32,11 @@ export const solicitarFechamentoConta = async (
 				},
 			},
 			infoMesa: params.infoMesa,
-			impressaoConta: params.impressaoConta,
+			// Só envia com área definida: a tag com 0 faz o servidor recusar a impressão,
+			// e sem ela ele imprime na área "Conta Padrão" (mesma regra do app antigo)
+			...(params.impressaoConta > 0 && {
+				impressaoConta: params.impressaoConta,
+			}),
 		},
 	};
 

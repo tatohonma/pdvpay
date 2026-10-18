@@ -16,6 +16,9 @@ export const getClient = async (params: ClientSearchParams) => {
 export type InsertClientRequest = {
   NomeCompleto: string;
   Documento1?: string;
+  RG?: string;
+  /** "aaaa-mm-dd" */
+  DtNascimento?: string;
   Telefone1DDD?: number;
   Telefone1Numero?: number;
 };

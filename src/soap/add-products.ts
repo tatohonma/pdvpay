@@ -9,6 +9,8 @@ interface ProductItem {
 	/** Preço informado pelo usuário (config AskPrice = 1); envia `valor` na requisição. */
 	valorInformado?: boolean;
 	modificacoes?: { idProduto: number }[];
+	/** Área de produção onde o item é impresso; sem ela o servidor usa o padrão do produto. */
+	idArea?: number;
 }
 
 export interface AddProductsParams {
@@ -46,6 +48,7 @@ export const addProducts = async (params: AddProductsParams) => {
 							valor: p.valorUnitario.toFixed(2).replace('.', ','),
 						}),
 					notas: p.notas || '',
+					...(p.idArea && { idAreaImpressao: p.idArea }),
 					listaModificacoes: p.modificacoes?.length
 						? {
 								PedidoProduto: p.modificacoes.map((m) => ({

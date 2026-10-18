@@ -6,6 +6,7 @@ import {
   Alert,
   Modal,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -80,25 +81,102 @@ const buildSearchParams = (
 ): ClientSearchParams =>
   isDocument(value, clientType) ? { documento: value } : { telefone: value };
 
+type NewClientForm = {
+  name: string;
+  cpf: string;
+  rg: string;
+  birthDate: string;
+};
+
+type NewClientRules = {
+  /** Busca foi por telefone: o documento ainda não é conhecido. */
+  askCpf: boolean;
+  cpfRequired: boolean;
+  rgRequired: boolean;
+  birthDateRequired: boolean;
+};
+
+const EMPTY_CLIENT: NewClientForm = { name: "", cpf: "", rg: "", birthDate: "" };
+
+// Aceita "ddmmaaaa" ou "dd/mm/aaaa"; devolve "aaaa-mm-dd" ou null se a data não existir
+const parseBirthDate = (value: string) => {
+  const digits = onlyDigits(value);
+  if (digits.length !== 8) return null;
+
+  const [day, month, year] = [
+    Number(digits.slice(0, 2)),
+    Number(digits.slice(2, 4)),
+    Number(digits.slice(4)),
+  ];
+  const date = new Date(year, month - 1, day);
+  const exists =
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day;
+
+  if (!exists || date > new Date()) return null;
+  return `${digits.slice(4)}-${digits.slice(2, 4)}-${digits.slice(0, 2)}`;
+};
+
+const formatBirthDate = (value: string) => {
+  const digits = onlyDigits(value).slice(0, 8);
+  return [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4)]
+    .filter(Boolean)
+    .join("/");
+};
+
+// Mesmas regras do cadastro do app antigo (ComandaCheckInServices)
+const validateNewClient = (form: NewClientForm, rules: NewClientRules) => {
+  const errors: string[] = [];
+  const cpf = onlyDigits(form.cpf);
+
+  if (!form.name.trim()) errors.push("Nome");
+  if (
+    rules.askCpf &&
+    (rules.cpfRequired || cpf) &&
+    cpf.length !== 11 &&
+    cpf.length !== 14
+  ) {
+    errors.push("Somente os números do CPF ou CNPJ");
+  }
+  if (rules.rgRequired && form.rg.trim().length < 6) errors.push("RG");
+  if (rules.birthDateRequired && !parseBirthDate(form.birthDate)) {
+    errors.push("Data de nascimento (DD/MM/AAAA)");
+  }
+
+  return errors;
+};
+
 const buildNewClient = (
-  name: string,
+  form: NewClientForm,
   value: string,
   clientType: ClientType,
 ): InsertClientRequest => {
+  const extra = {
+    NomeCompleto: form.name.trim(),
+    ...(form.rg.trim() && { RG: form.rg.trim() }),
+    ...(parseBirthDate(form.birthDate) && {
+      DtNascimento: parseBirthDate(form.birthDate) as string,
+    }),
+  };
+
   if (isDocument(value, clientType)) {
-    return { NomeCompleto: name, Documento1: value };
+    return { ...extra, Documento1: value };
   }
+
+  const cpf = onlyDigits(form.cpf);
+  const withCpf = { ...extra, ...(cpf && { Documento1: cpf }) };
 
   // Com DDD (10 ou 11 dígitos) o DDD vai em campo separado
   if (value.length >= 10) {
     return {
-      NomeCompleto: name,
+      ...withCpf,
       Telefone1DDD: Number(value.slice(0, 2)),
       Telefone1Numero: Number(value.slice(2)),
     };
   }
 
-  return { NomeCompleto: name, Telefone1Numero: Number(value) };
+  return { ...withCpf, Telefone1Numero: Number(value) };
 };
 
 export const CheckIn = (props: Props) => {
@@ -106,9 +184,16 @@ export const CheckIn = (props: Props) => {
   const [loading, setLoading] = useState(false);
   const [entryOpen, setEntryOpen] = useState(false);
   const [nameOpen, setNameOpen] = useState(false);
-  const [clientName, setClientName] = useState("");
+  const [newClient, setNewClient] = useState<NewClientForm>(EMPTY_CLIENT);
+  const [newClientErrors, setNewClientErrors] = useState<string[]>([]);
   const [clientId, setClientId] = useState<number | null>(null);
-  const { TipoCliente, AbrirComanda } = useServerConfig();
+  const {
+    TipoCliente,
+    AbrirComanda,
+    ClienteCPFObrigatorio,
+    ClienteRGObrigatorio,
+    ClienteDataNascimentoObrigatorio,
+  } = useServerConfig();
   const { idPDV } = usePDV();
   const { id } = useUser();
   const { setCurrentOrderInfo } = useOrderStoreActions();
@@ -211,7 +296,8 @@ export const CheckIn = (props: Props) => {
 
       // NOVO: cadastra o cliente; SIM: só aceita cliente já cadastrado
       if (AbrirComanda === "NOVO") {
-        setClientName("");
+        setNewClient(EMPTY_CLIENT);
+        setNewClientErrors([]);
         setNameOpen(true);
         return;
       }
@@ -219,14 +305,26 @@ export const CheckIn = (props: Props) => {
       fail("Cliente não encontrado!");
     });
 
+  const getClientRules = (value: string): NewClientRules => ({
+    askCpf: !isDocument(value, clientType),
+    cpfRequired: String(ClienteCPFObrigatorio) === "1",
+    rgRequired: String(ClienteRGObrigatorio) === "1",
+    birthDateRequired: String(ClienteDataNascimentoObrigatorio) === "1",
+  });
+  const clientRules = getClientRules(onlyDigits(form.watch("number")));
+
+  const updateNewClient = (field: keyof NewClientForm, value: string) =>
+    setNewClient((state) => ({ ...state, [field]: value }));
+
   const handleCreateClient = () =>
     run(async () => {
-      const name = clientName.trim();
-      if (!name) return;
-
       const value = onlyDigits(form.getValues("number"));
+      const errors = validateNewClient(newClient, getClientRules(value));
+      setNewClientErrors(errors);
+      if (errors.length) return;
+
       const response = await insertClient(
-        buildNewClient(name, value, clientType),
+        buildNewClient(newClient, value, clientType),
       );
 
       if (!response?.Id) {
@@ -298,7 +396,7 @@ export const CheckIn = (props: Props) => {
         onRequestClose={() => setNameOpen(false)}
       >
         <View className="flex-1 justify-center items-center p-4 bg-black/40">
-          <View className="p-5 bg-white rounded-2xl shadow-lg w-[92%] max-w-md">
+          <View className="p-5 bg-white rounded-2xl shadow-lg w-[92%] max-w-md max-h-[90%]">
             <Text className="text-xs font-medium text-zinc-500">
               Cliente não cadastrado
             </Text>
@@ -306,18 +404,78 @@ export const CheckIn = (props: Props) => {
               Novo cliente
             </Text>
 
-            <Text className="text-xs font-medium text-zinc-500 mb-1.5">
-              Nome *
-            </Text>
-            <TextInput
-              autoFocus
-              value={clientName}
-              onChangeText={setClientName}
-              autoCapitalize="words"
-              placeholder="Nome do cliente"
-              placeholderTextColor="#a1a1aa"
-              className="h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
-            />
+            <ScrollView className="grow-0" keyboardShouldPersistTaps="handled">
+              <Text className="text-xs font-medium text-zinc-500 mb-1.5">
+                Nome *
+              </Text>
+              <TextInput
+                autoFocus
+                value={newClient.name}
+                onChangeText={(v) => updateNewClient("name", v)}
+                autoCapitalize="words"
+                placeholder="Nome do cliente"
+                placeholderTextColor="#a1a1aa"
+                className="h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
+              />
+
+              {clientRules.askCpf && (
+                <>
+                  <Text className="text-xs font-medium text-zinc-500 mb-1.5 mt-3">
+                    {`CPF/CNPJ${clientRules.cpfRequired ? " *" : ""}`}
+                  </Text>
+                  <TextInput
+                    value={newClient.cpf}
+                    onChangeText={(v) => updateNewClient("cpf", onlyDigits(v))}
+                    inputMode="numeric"
+                    maxLength={14}
+                    placeholder="Somente números"
+                    placeholderTextColor="#a1a1aa"
+                    className="h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
+                  />
+                </>
+              )}
+
+              {clientRules.rgRequired && (
+                <>
+                  <Text className="text-xs font-medium text-zinc-500 mb-1.5 mt-3">
+                    RG *
+                  </Text>
+                  <TextInput
+                    value={newClient.rg}
+                    onChangeText={(v) => updateNewClient("rg", v)}
+                    autoCapitalize="characters"
+                    placeholder="RG"
+                    placeholderTextColor="#a1a1aa"
+                    className="h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
+                  />
+                </>
+              )}
+
+              {clientRules.birthDateRequired && (
+                <>
+                  <Text className="text-xs font-medium text-zinc-500 mb-1.5 mt-3">
+                    Data de nascimento *
+                  </Text>
+                  <TextInput
+                    value={newClient.birthDate}
+                    onChangeText={(v) =>
+                      updateNewClient("birthDate", formatBirthDate(v))
+                    }
+                    inputMode="numeric"
+                    maxLength={10}
+                    placeholder="DD/MM/AAAA"
+                    placeholderTextColor="#a1a1aa"
+                    className="h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
+                  />
+                </>
+              )}
+
+              {newClientErrors.length > 0 && (
+                <Text className="text-xs text-red-500 mt-3">
+                  {`Informe corretamente: ${newClientErrors.join(", ")}`}
+                </Text>
+              )}
+            </ScrollView>
 
             <View className="flex-row mt-5 items-center justify-end gap-3">
               <TouchableOpacity
@@ -327,9 +485,9 @@ export const CheckIn = (props: Props) => {
                 <Text className="text-zinc-600 font-medium">Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                disabled={!clientName.trim() || loading}
+                disabled={!newClient.name.trim() || loading}
                 onPress={handleCreateClient}
-                className={`px-5 py-2.5 rounded-lg bg-emerald-500 ${clientName.trim() && !loading ? "" : "opacity-50"}`}
+                className={`px-5 py-2.5 rounded-lg bg-emerald-500 ${newClient.name.trim() && !loading ? "" : "opacity-50"}`}
               >
                 <Text className="text-white font-semibold">Cadastrar</Text>
               </TouchableOpacity>

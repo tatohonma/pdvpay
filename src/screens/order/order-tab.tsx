@@ -5,7 +5,9 @@ import {
 	useRoute,
 } from '@react-navigation/native';
 import { useMutation } from '@tanstack/react-query';
+import { useMemo, useRef, useState } from 'react';
 import {
+	ActivityIndicator,
 	Alert,
 	ScrollView,
 	Text,
@@ -19,7 +21,11 @@ import { type AddProductsParams, addProducts } from '../../soap/add-products';
 import { useOrderStore } from '../../store/useOrderStore';
 import { usePDV, useUser } from '../../store/useAppStore';
 import { useServerConfig } from '../../store/useSettingsStore';
+import { cn } from '../../utils/cn';
 import { formatCurrency } from '../../utils/format';
+import { parseAreaIds, resolvePrintAreas } from '../../utils/print-areas';
+import { useGetProducts } from '../../hooks/useGetProducts';
+import { AreaModal } from './area-modal';
 
 type DetailsRouteProp = RouteProp<
 	{ Order: { number: string; type: 'command' | 'table' } },
@@ -35,15 +41,51 @@ export const OrderTab = () => {
 	const pdv = usePDV();
 	const user = useUser();
 	const insets = useSafeAreaInsets();
+	const products = useGetProducts();
+	const [areaPrompt, setAreaPrompt] = useState<
+		| (NonNullable<ReturnType<typeof resolvePrintAreas>['pending']> & {
+				chosenAreas: number[];
+		  })
+		| null
+	>(null);
+
+	const productAreas = useMemo(
+		() =>
+			new Map(
+				(products.data ?? []).map((p) => [p.IDProduto, p.AreasDeImpressao]),
+			),
+		[products.data],
+	);
+
+	// O servidor descarta pedidos com guidPedido repetido. Reaproveitar o GUID
+	// enquanto o pedido não mudar evita lançar duas vezes quando o envio chegou
+	// ao servidor mas a resposta se perdeu (rede caiu, timeout)
+	const guidRef = useRef<{ key: string; guid: string } | null>(null);
+	const getGuidPedido = () => {
+		const key = JSON.stringify(
+			selectedProducts.map((p) => [p.groupKey, p.qtd, p.valorUnitario]),
+		);
+
+		if (guidRef.current?.key !== key) {
+			guidRef.current = { key, guid: uuidv4() };
+		}
+
+		return guidRef.current.guid;
+	};
 
 	const mutation = useMutation({
 		mutationFn: (newProducts: AddProductsParams) => addProducts(newProducts),
-		onSettled: () => actions.resetProducts(),
+		// Falha de rede: tenta de novo com o mesmo GUID, como o app antigo (4 tentativas)
+		retry: 3,
+		retryDelay: 1000,
 		onError: () => {
+			// O pedido continua na tela para o garçom tentar de novo
 			ToastAndroid.show('Erro ao Enviar Pedido', ToastAndroid.LONG);
 		},
 		onSuccess: async (data) => {
 			if (data.status === 1) {
+				guidRef.current = null;
+				actions.resetProducts();
 				ToastAndroid.show('Pedido Enviado Com Sucesso', ToastAndroid.LONG);
 				if (serverConfig.AutenticarSempre === '1') {
 					navigation.reset({
@@ -69,6 +111,41 @@ export const OrderTab = () => {
 			}
 		},
 	});
+
+	const submitOrder = (chosenAreas: number[]) => {
+		if (mutation.isPending) return;
+
+		if (selectedProducts.length === 0) {
+			ToastAndroid.show('Nenhum item selecionado', ToastAndroid.SHORT);
+			return;
+		}
+
+		const { items, pending } = resolvePrintAreas({
+			items: selectedProducts,
+			getAreas: (id) => productAreas.get(id),
+			enabled: String(serverConfig.UsarAreas) === '1',
+			defaultAreas: parseAreaIds(serverConfig.AreasPadrao),
+			chosenAreas,
+		});
+
+		if (pending) {
+			setAreaPrompt({ ...pending, chosenAreas });
+			return;
+		}
+
+		setAreaPrompt(null);
+		mutation.mutate({
+			guidIdentificacao: String(currentOrderInfo?.guidIdentificacao),
+			guidPedido: getGuidPedido(),
+			idPDV: Number(pdv.idPDV),
+			idPedido: Number(currentOrderInfo?.idPedido),
+			idTipoPedido: Number(currentOrderInfo?.idTipoPedido),
+			idUsuario: Number(user.id),
+			numero: params.number,
+			produtos: items,
+			referenciaLocalizacao: currentOrderInfo?.referenciaLocalizacao,
+		});
+	};
 
 	return (
 		<View className="flex-1 p-2">
@@ -185,24 +262,35 @@ export const OrderTab = () => {
 			</ScrollView>
 			<View className="items-center" style={{ paddingBottom: insets.bottom }}>
 				<TouchableOpacity
-					onPress={async () => {
-						await mutation.mutateAsync({
-							guidIdentificacao: String(currentOrderInfo?.guidIdentificacao),
-							guidPedido: uuidv4(),
-							idPDV: Number(pdv.idPDV),
-							idPedido: Number(currentOrderInfo?.idPedido),
-							idTipoPedido: Number(currentOrderInfo?.idTipoPedido),
-							idUsuario: Number(user.id),
-							numero: params.number,
-							produtos: selectedProducts,
-							referenciaLocalizacao: currentOrderInfo?.referenciaLocalizacao,
-						});
-					}}
-					className="w-full p-2.5 items-center justify-center bg-emerald-500 rounded-lg"
+					onPress={() => submitOrder([])}
+					disabled={mutation.isPending}
+					className={cn(
+						'w-full p-2.5 flex-row gap-2 items-center justify-center bg-emerald-500 rounded-lg',
+						(selectedProducts.length === 0 || mutation.isPending) &&
+							'opacity-50',
+					)}
 				>
-					<Text className="text-white font-semibold">Confirmar</Text>
+					{mutation.isPending && <ActivityIndicator color="white" />}
+					<Text className="text-white font-semibold">
+						{mutation.isPending
+							? mutation.failureCount > 0
+								? `Tentativa ${mutation.failureCount + 1} de 4...`
+								: 'Enviando...'
+							: 'Confirmar'}
+					</Text>
 				</TouchableOpacity>
 			</View>
+
+			{areaPrompt && (
+				<AreaModal
+					productNames={areaPrompt.productNames}
+					options={areaPrompt.options}
+					onCancel={() => setAreaPrompt(null)}
+					onSelect={(idArea) =>
+						submitOrder([...areaPrompt.chosenAreas, idArea])
+					}
+				/>
+			)}
 		</View>
 	);
 };
