@@ -3,6 +3,8 @@ package com.freshnative
 import android.content.Intent
 import android.os.Bundle
 
+import androidx.activity.OnBackPressedCallback
+
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.ReactApplication
@@ -28,6 +30,14 @@ override fun onCreate(savedInstanceState: Bundle?) {
     supportFragmentManager.fragmentFactory = RNScreensFragmentFactory()
 
     super.onCreate(savedInstanceState)
+
+    // Botão/gesto voltar do Android desativado: não troca de tela nem fecha o app.
+    // Registrado depois do super.onCreate, tem prioridade sobre o callback do
+    // ReactActivity, então o voltar nem chega ao JS. Sair de telas só pelos
+    // botões do próprio app; minimizar continua pelo botão início.
+    onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() = Unit
+    })
 
     handleIntent(intent)
 }

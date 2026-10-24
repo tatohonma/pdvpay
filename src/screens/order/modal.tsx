@@ -1,3 +1,4 @@
+import { ignoreHardwareBack } from '../../utils/back';
 import { Lucide } from '@react-native-vector-icons/lucide';
 import { memo, useCallback, useMemo, useState } from 'react';
 import {
@@ -443,7 +444,7 @@ const ProductDetailsModal = ({
 	};
 
 	return (
-		<Modal transparent visible animationType="fade" onRequestClose={goBack}>
+		<Modal transparent visible animationType="fade" onRequestClose={ignoreHardwareBack}>
 			<View className="flex-1 justify-center items-center p-4 bg-black/40">
 				<View className="p-5 bg-white rounded-2xl shadow-lg w-[92%] max-w-md max-h-[90%]">
 					<Text

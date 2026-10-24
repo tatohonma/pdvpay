@@ -1,3 +1,4 @@
+import { ignoreHardwareBack } from '../../utils/back';
 import { Lucide } from '@react-native-vector-icons/lucide';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
@@ -184,7 +185,7 @@ export const SettingsScreen = () => {
 				transparent
 				visible={visible}
 				animationType="fade"
-				onRequestClose={() => setVisible(false)}
+				onRequestClose={ignoreHardwareBack}
 			>
 				<TouchableWithoutFeedback onPress={() => setVisible(false)}>
 					<View className="flex-1 justify-center items-center p-4 bg-black/40">

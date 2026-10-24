@@ -1,3 +1,4 @@
+import { ignoreHardwareBack } from '../../utils/back';
 import { Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import type { PrintAreaOption } from '../../utils/print-areas';
 
@@ -14,7 +15,7 @@ export const AreaModal = ({
 	onCancel,
 	onSelect,
 }: AreaModalProps) => (
-	<Modal transparent visible animationType="fade" onRequestClose={onCancel}>
+	<Modal transparent visible animationType="fade" onRequestClose={ignoreHardwareBack}>
 		<View className="flex-1 justify-center items-center p-4 bg-black/40">
 			<View className="p-5 bg-white rounded-2xl shadow-lg w-[92%] max-w-md max-h-[90%]">
 				<Text className="font-semibold text-lg text-zinc-800">

@@ -1,10 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
+import { type AxiosError, isAxiosError } from 'axios';
 import { api } from '../config/axios';
+import { useSettingsStore } from '../store/useSettingsStore';
 
 export interface Product {
 	IDProduto: number;
 	IDTipoProduto: number;
+	/** Só vem no endpoint api/app/produtos (tbProduto.Codigo). */
+	Codigo?: string | null;
+	/** Só vem no endpoint api/app/produtos (tbProduto.CodigoERP). */
+	CodigoERP?: string | null;
 	Nome: string;
 	Descricao: string;
 	ValorUnitario: number;
@@ -48,16 +53,49 @@ export interface AreaDeImpressao {
 	IDTIpo: number;
 }
 
+// Rotas de listagem, da mais nova para a mais antiga:
+// - api/app/v2/produtos: listagem otimizada compilada junto com o WS2
+// - api/app/produtos: a mesma listagem no AppExtensions.dll (servidores antes do WS2 novo)
+// - api/produtos: listagem original, sem Codigo/CodigoERP
+// Servidor que não tem uma rota responde 404 e o app tenta a próxima
+const PRODUCT_ROUTES = [
+	'/api/app/v2/produtos',
+	'/api/app/produtos',
+	'/api/produtos',
+] as const;
+
+// Primeira rota que funcionou para o servidor configurado, para não repetir
+// os 404 a cada carga; recomeça do início se a URL do servidor mudar
+let resolvedRoute: { serverURL: string | undefined; index: number } | null =
+	null;
+
+const fetchProducts = async (tipo: number): Promise<Product[]> => {
+	const serverURL = useSettingsStore.getState().serverURL;
+	const cached = resolvedRoute;
+	const start = cached && cached.serverURL === serverURL ? cached.index : 0;
+
+	for (let index = start; index < PRODUCT_ROUTES.length; index++) {
+		const isLast = index === PRODUCT_ROUTES.length - 1;
+
+		try {
+			const response = await api.get(PRODUCT_ROUTES[index], {
+				params: { tipo },
+			});
+			resolvedRoute = { serverURL, index };
+			return response.data;
+		} catch (error) {
+			const notFound =
+				isAxiosError(error) && error.response?.status === 404;
+			if (!notFound || isLast) throw error;
+		}
+	}
+
+	throw new Error('Nenhuma rota de produtos disponível');
+};
+
 export const productsQueryOptions = {
 	queryKey: ['products'],
-	queryFn: async (): Promise<Product[]> => {
-		const response = await api.get(`/api/produtos`, {
-			params: {
-				tipo: 10,
-			},
-		});
-		return response.data;
-	},
+	queryFn: () => fetchProducts(10),
 };
 
 export const useGetProducts = () => {
@@ -71,15 +109,7 @@ export const useGetProducts = () => {
 // então o nome vem desta lista.
 export const modifierProductsQueryOptions = {
 	queryKey: ['products', 'modifiers'],
-	queryFn: async (): Promise<Product[]> => {
-		const response = await api.get(`/api/produtos`, {
-			params: {
-				tipo: 20,
-			},
-		});
-
-		return response.data;
-	},
+	queryFn: () => fetchProducts(20),
 };
 
 const toProductMap = (products: Product[]) =>

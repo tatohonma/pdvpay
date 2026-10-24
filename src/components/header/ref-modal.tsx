@@ -1,3 +1,4 @@
+import { ignoreHardwareBack } from '../../utils/back';
 import Lucide from '@react-native-vector-icons/lucide';
 import { useState } from 'react';
 import { Modal, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -19,7 +20,7 @@ export const AskRefModal = () => {
 				transparent
 				visible={visible}
 				animationType="fade"
-				onRequestClose={() => setVisible(false)}
+				onRequestClose={ignoreHardwareBack}
 			>
 				<View className="flex-1 justify-center items-center p-4 bg-black/40">
 					<View className="p-5 bg-white rounded-2xl shadow-lg w-[92%] max-w-md">

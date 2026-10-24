@@ -1,3 +1,4 @@
+import { ignoreHardwareBack } from "../../utils/back";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -393,7 +394,7 @@ export const CheckIn = (props: Props) => {
         transparent
         visible={nameOpen}
         animationType="fade"
-        onRequestClose={() => setNameOpen(false)}
+        onRequestClose={ignoreHardwareBack}
       >
         <View className="flex-1 justify-center items-center p-4 bg-black/40">
           <View className="p-5 bg-white rounded-2xl shadow-lg w-[92%] max-w-md max-h-[90%]">
@@ -500,7 +501,7 @@ export const CheckIn = (props: Props) => {
         transparent
         visible={entryOpen}
         animationType="fade"
-        onRequestClose={() => setEntryOpen(false)}
+        onRequestClose={ignoreHardwareBack}
       >
         <View className="flex-1 justify-center items-center p-4 bg-black/40">
           <View className="p-5 bg-white rounded-2xl shadow-lg w-[92%] max-w-md">

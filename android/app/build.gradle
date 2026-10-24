@@ -82,8 +82,16 @@ android {
         applicationId "com.freshnative"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
+        // A cada versão para os clientes: suba o versionName e some 1 no versionCode
+        // (o Android só aceita atualizar para um versionCode igual ou maior)
         versionCode 1
-        versionName "1.0"
+        versionName "0.0.1"
+    }
+    // APK com nome e versão, ex.: zolv-comanda-0.0.1.apk
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "zolv-comanda-${variant.versionName}.apk"
+        }
     }
     signingConfigs {
         debug {

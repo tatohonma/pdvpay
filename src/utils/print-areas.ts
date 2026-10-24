@@ -36,9 +36,15 @@ export const resolvePrintAreas = <T extends AreaItem>({
 	const pending: { item: T; areas: PrintAreaOption[] }[] = [];
 
 	const resolved = items.map((item) => {
-		const areas = (getAreas(item.idProduto) ?? [])
-			.filter((a) => a?.IDAreaImpressao > 0)
-			.map((a): PrintAreaOption => ({ id: a.IDAreaImpressao, nome: a.Nome }));
+		// O api/produtos repete a mesma área quando o mapeamento tem linhas
+		// duplicadas; [Bar, Bar] é uma área só, não uma escolha
+		const areasById = new Map<number, PrintAreaOption>();
+		for (const a of getAreas(item.idProduto) ?? []) {
+			if (a?.IDAreaImpressao > 0 && !areasById.has(a.IDAreaImpressao)) {
+				areasById.set(a.IDAreaImpressao, { id: a.IDAreaImpressao, nome: a.Nome });
+			}
+		}
+		const areas = [...areasById.values()];
 
 		if (!enabled || areas.length === 0) return { ...item, idArea: undefined };
 		if (areas.length === 1) return { ...item, idArea: areas[0].id };

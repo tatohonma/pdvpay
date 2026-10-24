@@ -43,11 +43,16 @@ const StateMessage = ({
 	</View>
 );
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 export const ProductsTab = () => {
 	const categoryId = useOrderStore((state) => state.categoryId);
 	const products = useGetProducts();
 	const modifierProducts = useModifierProducts();
+	// `search` é o que está digitado; `appliedSearch` é o que filtra a lista,
+	// aplicado após uma pausa na digitação (ou na hora, ao tocar em buscar)
 	const [search, setSearch] = useState('');
+	const [appliedSearch, setAppliedSearch] = useState('');
 	const { width } = useWindowDimensions();
 	const insets = useSafeAreaInsets();
 	const numColumns = getNumColumns(width);
@@ -55,7 +60,18 @@ export const ProductsTab = () => {
 	// A busca vale só para a categoria atual; ao trocar de categoria, recomeça
 	useEffect(() => {
 		setSearch('');
+		setAppliedSearch('');
 	}, [categoryId]);
+
+	useEffect(() => {
+		const timer = setTimeout(() => setAppliedSearch(search), SEARCH_DEBOUNCE_MS);
+		return () => clearTimeout(timer);
+	}, [search]);
+
+	const clearSearch = () => {
+		setSearch('');
+		setAppliedSearch('');
+	};
 
 	// Filtra e ordena uma única vez por carga; trocar de categoria só refiltra.
 	// Excluídos, inativos e indisponíveis não são vendidos. Modificadores também
@@ -86,11 +102,38 @@ export const ProductsTab = () => {
 		[sellableProducts, categoryId],
 	);
 
+	// Texto normalizado uma vez por carga, não a cada busca
+	const searchIndex = useMemo(
+		() =>
+			new Map(
+				sellableProducts.map((p) => [
+					p.IDProduto,
+					{
+						nome: normalizeText(p.Nome),
+						codigos: [p.Codigo, p.CodigoERP]
+							.map((c) => normalizeText(String(c ?? '').trim()))
+							.filter(Boolean),
+					},
+				]),
+			),
+		[sellableProducts],
+	);
+
+	// Nome: qualquer trecho. Código e código ERP: pelo início, para "12" não
+	// trazer todo código que tenha 1 e 2 no meio
 	const filteredProducts = useMemo(() => {
-		const term = normalizeText(search.trim());
+		const term = normalizeText(appliedSearch.trim());
 		if (!term) return categoryProducts;
-		return categoryProducts.filter((p) => normalizeText(p.Nome).includes(term));
-	}, [categoryProducts, search]);
+
+		return categoryProducts.filter((p) => {
+			const entry = searchIndex.get(p.IDProduto);
+			return (
+				!!entry &&
+				(entry.nome.includes(term) ||
+					entry.codigos.some((c) => c.startsWith(term)))
+			);
+		});
+	}, [categoryProducts, appliedSearch, searchIndex]);
 
 	const renderItem = useCallback(
 		({ item }: ListRenderItemInfo<Product>) => <ExtraInfoModal product={item} />,
@@ -123,8 +166,8 @@ export const ProductsTab = () => {
 				icon={<Lucide name="package-search" size={40} color="#a1a1aa" />}
 				title="Nenhum produto encontrado"
 				subtitle={
-					search.trim()
-						? `Nenhum produto corresponde a "${search.trim()}"`
+					appliedSearch.trim()
+						? `Nenhum produto corresponde a "${appliedSearch.trim()}"`
 						: 'Não há produtos disponíveis para essa categoria'
 				}
 			/>
@@ -138,7 +181,8 @@ export const ProductsTab = () => {
 				<TextInput
 					value={search}
 					onChangeText={setSearch}
-					placeholder="Buscar produto"
+					onSubmitEditing={() => setAppliedSearch(search)}
+					placeholder="Buscar por nome ou código"
 					placeholderTextColor="#a1a1aa"
 					autoCorrect={false}
 					returnKeyType="search"
@@ -146,7 +190,7 @@ export const ProductsTab = () => {
 				/>
 				{search.length > 0 && (
 					<TouchableOpacity
-						onPress={() => setSearch('')}
+						onPress={clearSearch}
 						hitSlop={8}
 						accessibilityLabel="Limpar busca"
 					>
