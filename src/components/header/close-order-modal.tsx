@@ -295,7 +295,7 @@ export const CloseOrderModal = () => {
 									<TextInput
 										control={form.control}
 										name="people_number"
-										className="h-10 rounded-lg bg-zinc-100 text-zinc-800 font-medium text-center"
+										className="text-sm h-10 rounded-lg bg-zinc-100 text-zinc-800 font-medium text-center"
 										autoFocus
 										showSoftInputOnFocus={false}
 									/>
@@ -318,13 +318,13 @@ export const CloseOrderModal = () => {
 									onPress={() => setVisible(false)}
 									className="px-4 py-2.5 rounded-lg bg-zinc-100"
 								>
-									<Text className="text-zinc-600 font-medium">Cancelar</Text>
+									<Text className="text-sm text-zinc-600 font-medium">Cancelar</Text>
 								</TouchableOpacity>
 								<TouchableOpacity
 									onPress={form.handleSubmit(onSubmit)}
 									className="px-5 py-2.5 rounded-lg bg-emerald-500"
 								>
-									<Text className="text-white font-semibold">
+									<Text className="text-sm text-white font-semibold">
 										Fechar conta
 									</Text>
 								</TouchableOpacity>

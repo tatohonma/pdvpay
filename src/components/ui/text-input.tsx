@@ -31,7 +31,7 @@ export function TextInput({
               <RNTextInput
                 placeholderTextColor="#a1a1aa"
                 className={cn(
-                  "rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-800",
+                  "text-sm rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-800",
                   className,
                 )}
                 onChangeText={field.onChange}

@@ -34,7 +34,7 @@ export const AreaModal = ({
 								onPress={() => onSelect(area.id)}
 								className="px-3 py-3 rounded-lg border border-zinc-200 bg-white"
 							>
-								<Text className="text-zinc-800 font-medium">{area.nome}</Text>
+								<Text className="text-sm text-zinc-800 font-medium">{area.nome}</Text>
 							</TouchableOpacity>
 						))}
 					</View>
@@ -45,7 +45,7 @@ export const AreaModal = ({
 						onPress={onCancel}
 						className="px-4 py-2.5 rounded-lg bg-zinc-100"
 					>
-						<Text className="text-zinc-600 font-medium">Cancelar</Text>
+						<Text className="text-sm text-zinc-600 font-medium">Cancelar</Text>
 					</TouchableOpacity>
 				</View>
 			</View>

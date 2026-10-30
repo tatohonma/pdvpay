@@ -28,7 +28,7 @@ export const AskRefModal = () => {
 							Referência
 						</Text>
 						<TextInput
-							className="border border-zinc-200 rounded-lg px-3 py-2 text-zinc-800"
+							className="text-sm border border-zinc-200 rounded-lg px-3 py-2 text-zinc-800"
 							value={currentOrderInfo?.referenciaLocalizacao ?? ''}
 							onChangeText={actions.setLocationRef}
 						/>
@@ -37,13 +37,13 @@ export const AskRefModal = () => {
 								onPress={() => setVisible(false)}
 								className="px-4 py-2.5 rounded-lg bg-zinc-100"
 							>
-								<Text className="text-zinc-600 font-medium">Cancelar</Text>
+								<Text className="text-sm text-zinc-600 font-medium">Cancelar</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
 								onPress={() => setVisible(false)}
 								className="px-5 py-2.5 rounded-lg bg-emerald-500"
 							>
-								<Text className="text-white font-semibold">OK</Text>
+								<Text className="text-sm text-white font-semibold">OK</Text>
 							</TouchableOpacity>
 						</View>
 					</View>

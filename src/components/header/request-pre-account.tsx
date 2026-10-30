@@ -195,13 +195,13 @@ export const RequestPreAccountModal = () => {
 									onPress={() => setVisible(false)}
 									className="px-4 py-2.5 rounded-lg bg-zinc-100"
 								>
-									<Text className="text-zinc-600 font-medium">Cancelar</Text>
+									<Text className="text-sm text-zinc-600 font-medium">Cancelar</Text>
 								</TouchableOpacity>
 								<TouchableOpacity
 									onPress={form.handleSubmit(onSubmit)}
 									className="px-5 py-2.5 rounded-lg bg-emerald-500"
 								>
-									<Text className="text-white font-semibold">Confirmar</Text>
+									<Text className="text-sm text-white font-semibold">Confirmar</Text>
 								</TouchableOpacity>
 							</View>
 						</View>

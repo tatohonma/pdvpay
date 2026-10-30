@@ -32,7 +32,7 @@ export const SetupScreen = () => {
 					navigation.navigate('Auth');
 				})}
 			>
-				<Text className="text-white font-semibold text-center">Confirmar</Text>
+				<Text className="text-sm text-white font-semibold text-center">Confirmar</Text>
 			</TouchableOpacity>
 		</ResponsiveScreen>
 	);

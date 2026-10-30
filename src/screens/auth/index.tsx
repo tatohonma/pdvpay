@@ -58,17 +58,17 @@ export const AuthScreen = () => {
 		<ResponsiveScreen center>
 			{authPdvMutation.error && (
 				<View>
-					<Text className="text-center text-red-600">
+					<Text className="text-sm text-center text-red-600">
 						{authPdvMutation.error.message}
 					</Text>
-					<Text className="text-zinc-500 text-center font-light mb-4">
+					<Text className="text-sm text-zinc-500 text-center font-light mb-4">
 						Contate nossa equipe de suporte!
 					</Text>
 					<TouchableOpacity
 						className="px-5 py-2.5 rounded-lg bg-zinc-100 self-center"
 						onPress={() => navigation.navigate('Setup')}
 					>
-						<Text className="text-zinc-600 font-medium">
+						<Text className="text-sm text-zinc-600 font-medium">
 							Alterar URL do servidor
 						</Text>
 					</TouchableOpacity>

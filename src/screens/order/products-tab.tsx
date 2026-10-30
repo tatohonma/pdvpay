@@ -186,7 +186,7 @@ export const ProductsTab = () => {
 					placeholderTextColor="#a1a1aa"
 					autoCorrect={false}
 					returnKeyType="search"
-					className="flex-1 text-zinc-800"
+					className="text-sm flex-1 text-zinc-800"
 				/>
 				{search.length > 0 && (
 					<TouchableOpacity

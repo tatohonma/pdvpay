@@ -363,7 +363,7 @@ const ProductDetailsModal = ({
 									size={18}
 									color={checked ? '#10b981' : '#a1a1aa'}
 								/>
-								<Text numberOfLines={1} className="flex-1 text-zinc-800">
+								<Text numberOfLines={1} className="text-sm flex-1 text-zinc-800">
 									{option.nome}
 								</Text>
 								{option.valor > 0 && (
@@ -397,7 +397,7 @@ const ProductDetailsModal = ({
 					<Lucide name="minus" size={18} color="#3f3f46" />
 				</TouchableOpacity>
 				<TextInput
-					className="flex-1 h-10 rounded-lg bg-zinc-100 text-center text-zinc-800 font-medium"
+					className="text-sm flex-1 h-10 rounded-lg bg-zinc-100 text-center text-zinc-800 font-medium"
 					inputMode="numeric"
 					value={values.amount.toString()}
 					onChangeText={(v) =>
@@ -425,7 +425,7 @@ const ProductDetailsModal = ({
 				multiline
 				numberOfLines={3}
 				textAlignVertical="top"
-				className="border border-zinc-200 rounded-lg px-3 py-2 text-zinc-800 min-h-20"
+				className="text-sm border border-zinc-200 rounded-lg px-3 py-2 text-zinc-800 min-h-20"
 				onChangeText={(v) => setValues((s) => ({ ...s, observation: v }))}
 			/>
 		</>
@@ -476,7 +476,7 @@ const ProductDetailsModal = ({
 							onPress={goBack}
 							className="px-4 py-2.5 rounded-lg bg-zinc-100"
 						>
-							<Text className="text-zinc-600 font-medium">
+							<Text className="text-sm text-zinc-600 font-medium">
 								{step > 0 ? 'Voltar' : 'Cancelar'}
 							</Text>
 						</TouchableOpacity>
@@ -488,7 +488,7 @@ const ProductDetailsModal = ({
 							)}
 							onPress={isLastStep ? handleConfirm : () => setStep((s) => s + 1)}
 						>
-							<Text className="text-white font-semibold">
+							<Text className="text-sm text-white font-semibold">
 								{isLastStep ? 'Adicionar' : 'Continuar'}
 							</Text>
 						</TouchableOpacity>

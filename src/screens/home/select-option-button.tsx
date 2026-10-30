@@ -24,7 +24,7 @@ export const SelectOptionButton = ({
 			onPress={() => handleSelect?.(name)}
 			{...rest}
 		>
-			<Text className={cn(active === name && 'text-white')}>
+			<Text className={cn('text-sm', active === name && 'text-white')}>
 				{name.toUpperCase()}
 			</Text>
 		</TouchableOpacity>

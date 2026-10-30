@@ -354,7 +354,7 @@ export const CheckIn = (props: Props) => {
         <Text className="text-lg font-medium">
           {type === "command" && `COMANDA ${number}`}
         </Text>
-        <Text className="text-zinc-600">
+        <Text className="text-sm text-zinc-600">
           {`Digite o numero do ${clientString.toLowerCase()} para fazer o check in`}
         </Text>
       </View>
@@ -416,7 +416,7 @@ export const CheckIn = (props: Props) => {
                 autoCapitalize="words"
                 placeholder="Nome do cliente"
                 placeholderTextColor="#a1a1aa"
-                className="h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
+                className="text-sm h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
               />
 
               {clientRules.askCpf && (
@@ -431,7 +431,7 @@ export const CheckIn = (props: Props) => {
                     maxLength={14}
                     placeholder="Somente números"
                     placeholderTextColor="#a1a1aa"
-                    className="h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
+                    className="text-sm h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
                   />
                 </>
               )}
@@ -447,7 +447,7 @@ export const CheckIn = (props: Props) => {
                     autoCapitalize="characters"
                     placeholder="RG"
                     placeholderTextColor="#a1a1aa"
-                    className="h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
+                    className="text-sm h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
                   />
                 </>
               )}
@@ -466,7 +466,7 @@ export const CheckIn = (props: Props) => {
                     maxLength={10}
                     placeholder="DD/MM/AAAA"
                     placeholderTextColor="#a1a1aa"
-                    className="h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
+                    className="text-sm h-11 rounded-lg bg-zinc-100 px-3 text-zinc-800"
                   />
                 </>
               )}
@@ -483,14 +483,14 @@ export const CheckIn = (props: Props) => {
                 onPress={() => setNameOpen(false)}
                 className="px-4 py-2.5 rounded-lg bg-zinc-100"
               >
-                <Text className="text-zinc-600 font-medium">Cancelar</Text>
+                <Text className="text-sm text-zinc-600 font-medium">Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 disabled={!newClient.name.trim() || loading}
                 onPress={handleCreateClient}
                 className={`px-5 py-2.5 rounded-lg bg-emerald-500 ${newClient.name.trim() && !loading ? "" : "opacity-50"}`}
               >
-                <Text className="text-white font-semibold">Cadastrar</Text>
+                <Text className="text-sm text-white font-semibold">Cadastrar</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -527,7 +527,7 @@ export const CheckIn = (props: Props) => {
                       <View className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                     )}
                   </View>
-                  <Text className="text-zinc-700">{entry.Nome}</Text>
+                  <Text className="text-sm text-zinc-700">{entry.Nome}</Text>
                 </Pressable>
               );
             })}
@@ -537,13 +537,13 @@ export const CheckIn = (props: Props) => {
                 onPress={() => setEntryOpen(false)}
                 className="px-4 py-2.5 rounded-lg bg-zinc-100"
               >
-                <Text className="text-zinc-600 font-medium">Cancelar</Text>
+                <Text className="text-sm text-zinc-600 font-medium">Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleConfirmEntry}
                 className="px-5 py-2.5 rounded-lg bg-emerald-500"
               >
-                <Text className="text-white font-semibold">Confirmar</Text>
+                <Text className="text-sm text-white font-semibold">Confirmar</Text>
               </TouchableOpacity>
             </View>
           </View>

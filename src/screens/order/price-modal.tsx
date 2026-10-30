@@ -58,7 +58,7 @@ export const PriceModal = ({
 						inputMode="decimal"
 						placeholder="0,00"
 						placeholderTextColor="#a1a1aa"
-						className="h-11 rounded-lg bg-zinc-100 text-center text-zinc-800 font-medium"
+						className="text-sm h-11 rounded-lg bg-zinc-100 text-center text-zinc-800 font-medium"
 					/>
 
 					<View className="flex-row mt-5 items-center justify-end gap-3">
@@ -66,14 +66,14 @@ export const PriceModal = ({
 							onPress={handleCancel}
 							className="px-4 py-2.5 rounded-lg bg-zinc-100"
 						>
-							<Text className="text-zinc-600 font-medium">Cancelar</Text>
+							<Text className="text-sm text-zinc-600 font-medium">Cancelar</Text>
 						</TouchableOpacity>
 						<TouchableOpacity
 							disabled={!isValid}
 							onPress={handleConfirm}
 							className={`px-5 py-2.5 rounded-lg bg-emerald-500 ${isValid ? '' : 'opacity-50'}`}
 						>
-							<Text className="text-white font-semibold">Confirmar</Text>
+							<Text className="text-sm text-white font-semibold">Confirmar</Text>
 						</TouchableOpacity>
 					</View>
 				</View>
